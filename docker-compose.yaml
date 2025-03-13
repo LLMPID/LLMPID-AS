@@ -1,0 +1,89 @@
+version: '3.8'
+
+services:
+  traefik:
+    image: traefik:v2.10
+    container_name: traefik
+    restart: always
+    command:
+      - "--api.insecure=false"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+    ports:
+      - "${HOST_PORT}:80"   # Expose Traefik on port 80
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - public
+
+  postgres:
+    env_file: .env
+    image: postgres:17
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: llmpid
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./migrations/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d llmpid"]
+      interval: 5s
+      timeout: 5s
+      retries: 2
+    networks:
+      - restricted
+
+  internal_classifier_service:
+    container_name: internal_classifier_srvc
+    build:
+      context: ./backend/internal_classifier_service
+    networks:
+      - restricted
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8888/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 1
+
+  backend:
+    env_file: .env
+    build:
+      context: ./backend/llmpid_api
+    depends_on:
+      internal_classifier_service:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=PathPrefix(`/api`)"
+      - "traefik.http.services.backend.loadbalancer.server.port=8081"
+    networks:
+      - public
+      - restricted
+
+  frontend:
+    build:
+      context: ./frontend
+    depends_on:
+      - backend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
+      - "traefik.http.services.frontend.loadbalancer.server.port=8080"
+    networks:
+      - public
+
+
+networks:
+  public:
+    driver: bridge
+  restricted:
+    driver: bridge
+
+
+volumes:
+  postgres_data:

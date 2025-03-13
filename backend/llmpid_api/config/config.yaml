@@ -1,0 +1,16 @@
+host:
+  port: "8081"
+  environment: "development"
+  logsDirPath: ./log
+
+
+# The user and password variables will be overwritten by environmental variables on initialization of the API
+database:
+  host: "postgres_db"
+  port: "5432"
+  name: "llmpid"
+  user: ""
+  password: ""
+
+classifier:
+  classifierAPIPath: "http://internal_classifier_srvc:8888/classify"
