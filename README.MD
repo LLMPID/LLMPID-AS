@@ -7,7 +7,7 @@ Important: The current version is a PoC and lacks authentication and authorizati
 
 
 # Quick Look
-[![Quick demo video](https://drive.google.com/thumbnail?id=1P0fm3jR95rMjau5_tkkIDqcQvDF7wWWd)](https://drive.google.com/file/d/1P0fm3jR95rMjau5_tkkIDqcQvDF7wWWd/view?usp=sharing)
+[![Quick demo video](thumbnail.png)](https://drive.google.com/file/d/1P0fm3jR95rMjau5_tkkIDqcQvDF7wWWd/view?usp=sharing)
 
 
 # Why we made it?
