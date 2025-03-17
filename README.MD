@@ -6,6 +6,10 @@ The project provides an HTTP API that allows other systems (or users) to detect 
 Important: The current version is a PoC and lacks authentication and authorization functionalities. It can still be implemented as an internal service.
 
 
+# Quick Look
+[![Quick demo video](https://drive.google.com/thumbnail?id=1P0fm3jR95rMjau5_tkkIDqcQvDF7wWWd)](https://drive.google.com/file/d/1P0fm3jR95rMjau5_tkkIDqcQvDF7wWWd/view?usp=sharing)
+
+
 # Why we made it?
 We, along with a few of our friends, needed a simple, plug-and-play solution for detecting prompt injection in projects that utilize LLMs. A dedicated detection/classification layer allows developers to focus on building core product functionalities while offloading this aspect of security to an easy-to-integrate solution.
 
