@@ -212,3 +212,6 @@ We have decided to expand the project with the following features:
 * Authentication and authorization - for the administrator panel and the API itself.
 * Model loading inside the main Golang API.
 * Conversation session tracking - track the conversations in order to create larger message context and detect injections through batched prompts.
+
+# Known Technical Debt
+* Error handling.

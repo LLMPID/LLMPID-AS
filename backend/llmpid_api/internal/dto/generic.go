@@ -1,11 +1,6 @@
 package dto
 
 type GenericResponse struct {
-	Result string `json:"result"`
-	Data   string `json:"data"`
-}
-
-type Error struct {
-	Error   string `json:"error"`
-	Message string `json:"message"`
+	Status  string `json:"result"`
+	Message string `json:"data"`
 }

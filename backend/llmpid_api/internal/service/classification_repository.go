@@ -8,21 +8,21 @@ import (
 	"llm-promp-inj.api/internal/repository"
 )
 
-type ClassificationRequestService struct {
-	ClassificationLogsRepo *repository.ClassificationLogRepository
+type ClassificationService struct {
+	ClassificationLogsRepo *repository.ClassificationLogsRepository
 	ClassificationRepo     *repository.InternalClassifierAPIRepository
 }
 
-func NewClassificationRequestService(logsRepo *repository.ClassificationLogRepository, clsRepo *repository.InternalClassifierAPIRepository) *ClassificationRequestService {
-	return &ClassificationRequestService{
+func NewClassificationService(logsRepo *repository.ClassificationLogsRepository, clsRepo *repository.InternalClassifierAPIRepository) *ClassificationService {
+	return &ClassificationService{
 		ClassificationLogsRepo: logsRepo,
 		ClassificationRepo:     clsRepo,
 	}
 }
 
 // ClassifyText performs prompt injection classification for a privded string.
-// It first sends the string for classification to an internal API, retrieves and logs the result into a database, and then returns it to the client service.
-func (s *ClassificationRequestService) ClassifyText(ClassificationLog dto.ClassificationRequest) (*models.ClassificationLog, error) {
+// First, it sends the string for classification to an internal API, retrieves and logs the result into a database, and then returns it to the client service.
+func (s *ClassificationService) ClassifyText(ClassificationLog dto.ClassificationRequest) (*models.ClassificationLog, error) {
 	// Send data for classification.
 	clssResult, err := s.ClassificationRepo.SendClassificationRequest(ClassificationLog)
 	if err != nil {
@@ -39,7 +39,7 @@ func (s *ClassificationRequestService) ClassifyText(ClassificationLog dto.Classi
 	return clssRequest, nil
 }
 
-func (s *ClassificationRequestService) GetClassificationRequestLogByID(id uint) (*models.ClassificationLog, error) {
+func (s *ClassificationService) GetClassificationRequestLogByID(id uint) (*models.ClassificationLog, error) {
 	clssRequest, err := s.ClassificationLogsRepo.SelectClassificationLogByID(id)
 	if err != nil {
 		return nil, err
@@ -47,7 +47,7 @@ func (s *ClassificationRequestService) GetClassificationRequestLogByID(id uint) 
 	return clssRequest, nil
 }
 
-func (s *ClassificationRequestService) GetClassificationLogsByPage(page int, limit int, sortBy string) (*[]models.ClassificationLog, error) {
+func (s *ClassificationService) GetClassificationLogsByPage(page int, limit int, sortBy string) (*[]models.ClassificationLog, error) {
 	var orderBy string
 
 	// Assures that the sortBy parameter is valid. Defaults to "desc" if it is not.

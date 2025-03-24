@@ -14,9 +14,11 @@ type Config struct {
 }
 
 type HostConfiguration struct {
-	Port        string
-	Environment string
-	LogsDirPath string
+	Port               string
+	Environment        string
+	LogsDirPath        string
+	DefaultAPIUser     string
+	DefaultAPIPassword string
 }
 
 type DatabaseConfiguration struct {
@@ -55,6 +57,9 @@ func LoadConfig() *Config {
 	// Override database credentials from environment variables.
 	cfg.Database.User = viper.GetString("DB_USER")
 	cfg.Database.Password = viper.GetString("DB_PASSWORD")
+
+	cfg.Host.DefaultAPIUser = viper.GetString("DEFAULT_USER")
+	cfg.Host.DefaultAPIPassword = viper.GetString("DEFAULT_PASS")
 
 	return &cfg
 }

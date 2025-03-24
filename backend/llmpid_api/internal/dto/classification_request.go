@@ -1,5 +1,5 @@
 package dto
 
 type ClassificationRequest struct {
-	Text string `json:"text" binding:"required"`
+	Text string `json:"text" binding:"required" validate:"required"`
 }

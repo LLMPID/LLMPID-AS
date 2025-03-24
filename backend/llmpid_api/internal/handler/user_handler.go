@@ -1,0 +1,125 @@
+package handler
+
+import (
+	"net/http"
+	"strings"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/render"
+	"llm-promp-inj.api/config"
+	"llm-promp-inj.api/internal/dto"
+	"llm-promp-inj.api/internal/middleware"
+	"llm-promp-inj.api/internal/service"
+)
+
+type UserHandler struct {
+	UserService    *service.UserService
+	AuthService    *service.AuthenticationService
+	AuthMiddleware *middleware.AuthMiddleware
+
+	Config *config.Config
+}
+
+func NewUserHandler(authService *service.AuthenticationService, authMiddleware *middleware.AuthMiddleware) *UserHandler {
+	return &UserHandler{
+		AuthService:    authService,
+		AuthMiddleware: authMiddleware,
+	}
+}
+
+func (h *UserHandler) Routes() chi.Router {
+	r := chi.NewRouter()
+
+	r.Post("/auth", h.Auth)
+	r.With(h.AuthMiddleware.Authenticate([]string{"user"})).Post("/register", h.Register)
+	r.With(h.AuthMiddleware.Authenticate([]string{"user"})).Put("/logout", h.Logout)
+
+	return r
+}
+
+func (h *UserHandler) Auth(w http.ResponseWriter, r *http.Request) {
+	var loginRequest dto.AuthUserRequest
+
+	if err := render.DecodeJSON(r.Body, &loginRequest); err != nil {
+		render.Status(r, http.StatusBadRequest)
+		render.JSON(w, r, map[string]string{"error": "Invalid request"})
+		return
+	}
+
+	jwt, err := h.AuthService.AuthenticateUser(loginRequest.Usernames, loginRequest.Password, 60)
+	if err != nil {
+
+		response := dto.GenericResponse{
+			Status:  "Failed to authenticate user",
+			Message: err.Error(),
+		}
+
+		render.Status(r, http.StatusInternalServerError)
+		render.JSON(w, r, response)
+		return
+	}
+
+	if jwt == "" {
+		response := dto.GenericResponse{
+			Status:  "Unauthorized",
+			Message: "Wrong credetials",
+		}
+
+		render.Status(r, http.StatusUnauthorized)
+		render.JSON(w, r, response)
+		return
+	}
+
+	response := dto.GenericResponse{
+		Status:  "Success",
+		Message: jwt,
+	}
+
+	render.Status(r, http.StatusOK)
+	render.JSON(w, r, response)
+}
+
+func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
+	var registerRequest dto.AuthUserRequest
+
+	if err := render.DecodeJSON(r.Body, &registerRequest); err != nil {
+		render.Status(r, http.StatusBadRequest)
+		render.JSON(w, r, map[string]string{"error": "Invalid request"})
+		return
+	}
+
+	user, err := h.UserService.CreateUser(registerRequest.Usernames, registerRequest.Usernames, "user")
+	if err != nil {
+		render.Status(r, http.StatusBadRequest)
+		render.JSON(w, r, map[string]string{"error": "Failed to create user"})
+		return
+	}
+
+	userDTO := dto.UserResponse{
+		Username:  user.Username,
+		Role:      user.Role,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
+	}
+
+	render.Status(r, http.StatusCreated)
+	render.JSON(w, r, userDTO)
+}
+
+func (h *UserHandler) Logout(w http.ResponseWriter, r *http.Request) {
+	authHeader := r.Header.Get("Authorization")
+	parts := strings.Split(authHeader, " ")
+	tokenString := parts[1]
+
+	err := h.AuthService.RevokeUserSession(tokenString)
+	if err != nil {
+		resp := dto.GenericResponse{Status: "Fail", Message: err.Error()}
+
+		render.Status(r, http.StatusInternalServerError)
+		render.JSON(w, r, resp)
+		return
+	}
+
+	render.Status(r, http.StatusOK)
+
+}

@@ -7,41 +7,44 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 	"llm-promp-inj.api/internal/dto"
+	"llm-promp-inj.api/internal/middleware"
 	"llm-promp-inj.api/internal/service"
 )
 
-type ClassificationRequestHandler struct {
-	Service *service.ClassificationRequestService
+type ClassificationHandler struct {
+	ClssService    *service.ClassificationService
+	AuthMiddleware *middleware.AuthMiddleware
 }
 
-func NewClassificationRequestHandler(service *service.ClassificationRequestService) *ClassificationRequestHandler {
-	return &ClassificationRequestHandler{Service: service}
+func NewClassificationHandler(service *service.ClassificationService, authMiddleware *middleware.AuthMiddleware) *ClassificationHandler {
+	return &ClassificationHandler{ClssService: service, AuthMiddleware: authMiddleware}
 }
 
 // Define the routes of the controller
-func (h *ClassificationRequestHandler) Routes() chi.Router {
+func (h *ClassificationHandler) Routes() chi.Router {
 	r := chi.NewRouter()
 
-	r.Post("/", h.CreateClassificationRequest)
-	r.Get("/logs/{id}", h.GetClassificationRequestByID)
-	r.Get("/logs", h.GetClassificationRequestsByPage)
+	r.With(h.AuthMiddleware.Authenticate([]string{"user", "ext_sys"})).Post("/", h.CreateClassificationRequest)
+	r.With(h.AuthMiddleware.Authenticate([]string{"user", "ext_sys"})).Get("/logs/{id}", h.GetClassificationRequestByID)
+	r.With(h.AuthMiddleware.Authenticate([]string{"user", "ext_sys"})).Get("/logs", h.GetClassificationRequestsByPage)
 
 	return r
 }
 
-func (h *ClassificationRequestHandler) CreateClassificationRequest(w http.ResponseWriter, r *http.Request) {
+func (h *ClassificationHandler) CreateClassificationRequest(w http.ResponseWriter, r *http.Request) {
 	var classificationRequest dto.ClassificationRequest
 
 	if err := render.DecodeJSON(r.Body, &classificationRequest); err != nil {
+		render.Status(r, http.StatusBadRequest)
 		render.JSON(w, r, map[string]string{"error": "Invalid request"})
 		return
 	}
 
-	classificationRequestResult, err := h.Service.ClassifyText(classificationRequest)
+	classificationRequestResult, err := h.ClssService.ClassifyText(classificationRequest)
 	if err != nil {
 
-		response := dto.Error{
-			Error:   "Failed to classify data.",
+		response := dto.GenericResponse{
+			Status:  "Failed",
 			Message: err.Error(),
 		}
 
@@ -54,7 +57,7 @@ func (h *ClassificationRequestHandler) CreateClassificationRequest(w http.Respon
 	render.JSON(w, r, classificationRequestResult)
 }
 
-func (h *ClassificationRequestHandler) GetClassificationRequestByID(w http.ResponseWriter, r *http.Request) {
+func (h *ClassificationHandler) GetClassificationRequestByID(w http.ResponseWriter, r *http.Request) {
 	idURLParam := chi.URLParam(r, "id")
 
 	id, err := strconv.ParseUint(idURLParam, 10, 32)
@@ -66,10 +69,10 @@ func (h *ClassificationRequestHandler) GetClassificationRequestByID(w http.Respo
 	// Convert the id int parameter to unsigned int.
 	idUint := uint(id)
 
-	foundClssRequest, err := h.Service.GetClassificationRequestLogByID(idUint)
+	foundClssRequest, err := h.ClssService.GetClassificationRequestLogByID(idUint)
 	if err != nil {
-		errResponse := dto.Error{
-			Error:   "Unable to retrieve log with such id.",
+		errResponse := dto.GenericResponse{
+			Status:  "Failed for ID",
 			Message: err.Error(),
 		}
 		render.Status(r, http.StatusInternalServerError)
@@ -81,7 +84,7 @@ func (h *ClassificationRequestHandler) GetClassificationRequestByID(w http.Respo
 	render.JSON(w, r, foundClssRequest)
 }
 
-func (h *ClassificationRequestHandler) GetClassificationRequestsByPage(w http.ResponseWriter, r *http.Request) {
+func (h *ClassificationHandler) GetClassificationRequestsByPage(w http.ResponseWriter, r *http.Request) {
 	pageURLParam := r.URL.Query().Get("page")
 	limitURLParam := r.URL.Query().Get("limit")
 	orderByURLParam := r.URL.Query().Get("sortBy")
@@ -110,10 +113,10 @@ func (h *ClassificationRequestHandler) GetClassificationRequestsByPage(w http.Re
 		}
 	}
 
-	allClassificationReqs, err := h.Service.GetClassificationLogsByPage(pageNum, limit, orderByURLParam)
+	allClassificationReqs, err := h.ClssService.GetClassificationLogsByPage(pageNum, limit, orderByURLParam)
 	if err != nil {
-		errResponse := dto.Error{
-			Error:   "Unable to retrieve logs for page.",
+		errResponse := dto.GenericResponse{
+			Status:  "Failed for page",
 			Message: err.Error(),
 		}
 		render.Status(r, http.StatusInternalServerError)

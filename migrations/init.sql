@@ -5,3 +5,27 @@ CREATE TABLE IF NOT EXISTS classification_logs (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT NULL
 );
+
+CREATE TABLE IF NOT EXISTS users (
+    id BIGSERIAL PRIMARY KEY,
+    username VARCHAR(64) NOT NULL UNIQUE, 
+    password_hash TEXT NOT NULL,
+    role VARCHAR(32) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT NULL
+);
+
+CREATE TABLE IF NOT EXISTS revoked_tokens (
+    id BIGSERIAL PRIMARY KEY,
+    token TEXT NOT NULL,
+    expires_at BIGINT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT NULL
+);
+
+
+INSERT INTO users (username, password_hash, role) VALUES (
+    'admin',
+    '$argon2id$v=19$m=65536,t=1,p=10$ff+Is1j1GoKrkiiYvLLyGQ$xKmunDT6s3/xoa2+ajvex9tFDNdDLN5aSOFgVzqNMWo',
+    'user'
+);
