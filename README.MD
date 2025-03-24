@@ -6,6 +6,10 @@ The project provides an HTTP API that allows other systems (or users) to detect 
 Important: The current version is a PoC and lacks authentication and authorization functionalities. It can still be implemented as an internal service.
 
 
+# Quick Look
+[![Quick demo video](thumbnail.png)](https://drive.google.com/file/d/1P0fm3jR95rMjau5_tkkIDqcQvDF7wWWd/view?usp=sharing)
+
+
 # Why we made it?
 We, along with a few of our friends, needed a simple, plug-and-play solution for detecting prompt injection in projects that utilize LLMs. A dedicated detection/classification layer allows developers to focus on building core product functionalities while offloading this aspect of security to an easy-to-integrate solution.
 
@@ -212,6 +216,7 @@ We have decided to expand the project with the following features:
 * Authentication and authorization - for the administrator panel and the API itself.
 * Model loading inside the main Golang API.
 * Conversation session tracking - track the conversations in order to create larger message context and detect injections through batched prompts.
+* Re-training of the classification model with a better dataset.
 
 # Known Technical Debt
 * Error handling.
