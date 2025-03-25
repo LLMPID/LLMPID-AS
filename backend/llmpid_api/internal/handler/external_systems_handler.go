@@ -46,7 +46,7 @@ func (h *ExternalSystemHandler) Auth(w http.ResponseWriter, r *http.Request) {
 
 	// External systems are treated as an user with "ext_sys" role.
 	// 600 days expiration of service auth token. Needs to be withdrawn when not in use.
-	accessToken, err := h.AuthService.AuthenticateUser(authServiceRequest.SystemName, authServiceRequest.AccessKey, 36000)
+	accessToken, err := h.AuthService.Authenticate(authServiceRequest.SystemName, authServiceRequest.AccessKey, 36000)
 	if err != nil {
 		response := dto.GenericResponse{
 			Status:  "Failed to authenticate service",
@@ -94,7 +94,7 @@ func (h *ExternalSystemHandler) Deauth(w http.ResponseWriter, r *http.Request) {
 	parts := strings.Split(authHeader, " ")
 	tokenString := parts[1]
 
-	err := h.AuthService.RevokeUserSession(tokenString)
+	err := h.AuthService.RevokeSession(tokenString)
 	if err != nil {
 		resp := dto.GenericResponse{Status: "Fail", Message: err.Error()}
 

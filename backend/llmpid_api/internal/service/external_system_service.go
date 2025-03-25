@@ -15,7 +15,7 @@ func NewExternalSystemService(cryptoRepo *repository.CryptoRepository, logger *l
 	return &ExternalSystemService{CryptoRepo: cryptoRepo, logger: logger}
 }
 
-func (s *ExternalSystemService) RegisterExternalSystem(systemName string) (string, error) {
+func (s *ExternalSystemService) Register(systemName string) (string, error) {
 	systemAccessKey, err := s.CryptoRepo.GenrateRandomString(32)
 	if err != nil {
 		return "", err

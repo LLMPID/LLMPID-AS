@@ -21,7 +21,7 @@ func NewAuthenticationService(userRepo *repository.UserRepository, tokenRepo *re
 	}
 }
 
-func (s *AuthenticationService) AuthenticateUser(username string, password string, sessionExpiration int) (string, error) {
+func (s *AuthenticationService) Authenticate(username string, password string, sessionExpiration int) (string, error) {
 	user, err := s.UserRepo.SelectUserByUsername(username)
 	if err != nil {
 		return "", errors.New("user not found")
@@ -58,7 +58,7 @@ func (s *AuthenticationService) IsValidSession(sessionSlug string, sub string) b
 	return s.SessionRepo.IsValidSession(sessionSlug, sub)
 }
 
-func (s *AuthenticationService) RevokeUserSession(tokenString string) error {
+func (s *AuthenticationService) RevokeSession(tokenString string) error {
 	tokenClaims, err := s.TokenRepo.ExtractAndValidateJWT(tokenString)
 	if err != nil {
 		return err

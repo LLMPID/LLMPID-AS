@@ -46,7 +46,7 @@ func (h *UserHandler) Auth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jwt, err := h.AuthService.AuthenticateUser(loginRequest.Usernames, loginRequest.Password, 60)
+	jwt, err := h.AuthService.Authenticate(loginRequest.Usernames, loginRequest.Password, 60)
 	if err != nil {
 
 		response := dto.GenericResponse{
@@ -111,7 +111,7 @@ func (h *UserHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	parts := strings.Split(authHeader, " ")
 	tokenString := parts[1]
 
-	err := h.AuthService.RevokeUserSession(tokenString)
+	err := h.AuthService.RevokeSession(tokenString)
 	if err != nil {
 		resp := dto.GenericResponse{Status: "Fail", Message: err.Error()}
 
