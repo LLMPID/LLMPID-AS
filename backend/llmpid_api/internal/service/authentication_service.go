@@ -54,6 +54,10 @@ func (s *AuthenticationService) AuthenticateUser(username string, password strin
 	return accessToken, nil
 }
 
+func (s *AuthenticationService) IsValidSession(sessionSlug string, sub string) bool {
+	return s.SessionRepo.IsValidSession(sessionSlug, sub)
+}
+
 func (s *AuthenticationService) RevokeUserSession(tokenString string) error {
 	tokenClaims, err := s.TokenRepo.ExtractAndValidateJWT(tokenString)
 	if err != nil {

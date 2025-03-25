@@ -12,6 +12,7 @@ import (
 
 type AuthMiddleware struct {
 	tokenService *service.TokenService
+	authService  *service.AuthenticationService
 }
 
 func NewAuthMiddleware(tokenService *service.TokenService) *AuthMiddleware {
@@ -48,6 +49,12 @@ func (m *AuthMiddleware) Authenticate(requiredRole []string) func(http.Handler) 
 			if err != nil {
 				render.Status(r, http.StatusInternalServerError)
 				render.JSON(w, r, map[string]string{"status": "Internal Server Error"})
+				return
+			}
+
+			if !m.authService.IsValidSession(claims.SessionID, claims.Sub) {
+				render.Status(r, http.StatusUnauthorized)
+				render.JSON(w, r, map[string]string{"status": "Unauthorized"})
 				return
 			}
 

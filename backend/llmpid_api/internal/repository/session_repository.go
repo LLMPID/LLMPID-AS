@@ -36,7 +36,7 @@ func (r *SessionRepository) CreateSession(sessionSlug string, sub string) error 
 func (r *SessionRepository) IsValidSession(sessionSlug string, sub string) bool {
 	session, _ := r.SelectSessionBySlugAndSub(sessionSlug, sub)
 
-	return models.Session{} == session
+	return models.Session{} != session
 }
 
 func (r *SessionRepository) DeleteSessionBySub(sub string) error {
