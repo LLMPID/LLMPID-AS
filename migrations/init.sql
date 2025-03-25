@@ -23,6 +23,13 @@ CREATE TABLE IF NOT EXISTS revoked_tokens (
     updated_at TIMESTAMP DEFAULT NULL
 );
 
+CREATE TABLE IF NOT EXISTS sessions (
+    id BIGSERIAL PRIMARY KEY,
+    sub BIGINT NOT NULL,
+    slug VARCHAR(64) NOT NULL UNIQUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT NULL
+);
 
 INSERT INTO users (username, password_hash, role) VALUES (
     'admin',

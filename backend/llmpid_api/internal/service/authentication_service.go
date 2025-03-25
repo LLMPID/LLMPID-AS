@@ -3,14 +3,14 @@ package service
 import (
 	"errors"
 
-	"llm-promp-inj.api/internal/models"
 	"llm-promp-inj.api/internal/repository"
 )
 
 type AuthenticationService struct {
-	UserRepo   *repository.UserRepository
-	TokenRepo  *repository.TokenRepository
-	CryptoRepo *repository.CryptoRepository
+	UserRepo    *repository.UserRepository
+	TokenRepo   *repository.TokenRepository
+	CryptoRepo  *repository.CryptoRepository
+	SessionRepo *repository.SessionRepository
 }
 
 func NewAuthenticationService(userRepo *repository.UserRepository, tokenRepo *repository.TokenRepository, cryptoRepo *repository.CryptoRepository) *AuthenticationService {
@@ -35,11 +35,22 @@ func (s *AuthenticationService) AuthenticateUser(username string, password strin
 		return "", nil
 	}
 
-	accessToken, _, err := s.TokenRepo.GenerateJWT(user.Username, user.ID, sessionExpiration, user.Role)
+	sessionSlug, _ := s.CryptoRepo.GenrateRandomString(32)
+
+	accessToken, claims, err := s.TokenRepo.GenerateJWT(
+		user.Username,
+		user.ID,
+		sessionExpiration,
+		user.Role,
+		sessionSlug)
 	if err != nil {
 		return "", err
 	}
 
+	err = s.SessionRepo.CreateSession(sessionSlug, claims.Sub)
+	if err != nil {
+		return "", err
+	}
 	return accessToken, nil
 }
 
@@ -49,10 +60,5 @@ func (s *AuthenticationService) RevokeUserSession(tokenString string) error {
 		return err
 	}
 
-	revokedToken := models.RevokedToken{
-		Token:     tokenString,
-		ExpiresAt: tokenClaims.ExpiresAt.Unix(),
-	}
-
-	return s.TokenRepo.RevokeToken(revokedToken)
+	return s.SessionRepo.DeleteSessionBySub(tokenClaims.Sub)
 }

@@ -24,11 +24,6 @@ func NewTokenRepository(serverSecretKey string, db *gorm.DB, logger *logrus.Logg
 }
 
 func (r *TokenRepository) ExtractAndValidateJWT(tokenString string) (*models.AccessTokenClaims, error) {
-	// Check if the token has been blaclisted by a logout event
-	if err := r.DB.Where("token = ?", tokenString).First(&models.RevokedToken{}).Error; err == nil {
-		return nil, nil
-	}
-
 	// Parse and verify the JWT token
 	token, err := jwt.ParseWithClaims(tokenString, &models.AccessTokenClaims{}, func(token *jwt.Token) (interface{}, error) {
 		// Ensure the signing method is HMAC and using HS256
@@ -64,7 +59,7 @@ func (r *TokenRepository) ExtractAndValidateJWT(tokenString string) (*models.Acc
 	return claims, nil
 }
 
-func (r *TokenRepository) GenerateJWT(username string, userID uint, expiration int, role string) (string, models.AccessTokenClaims, error) {
+func (r *TokenRepository) GenerateJWT(username string, userID uint, expiration int, role string, sessionSlug string) (string, models.AccessTokenClaims, error) {
 	now := time.Now()
 
 	accessClaims := models.AccessTokenClaims{
@@ -72,6 +67,7 @@ func (r *TokenRepository) GenerateJWT(username string, userID uint, expiration i
 		Data: map[string]string{
 			"role": role,
 		},
+		SessionID: sessionSlug,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(now.Add(time.Minute * time.Duration(expiration))),
 			IssuedAt:  jwt.NewNumericDate(now),
@@ -88,16 +84,6 @@ func (r *TokenRepository) GenerateJWT(username string, userID uint, expiration i
 	}
 
 	return tokenString, accessClaims, nil
-}
-
-func (r *TokenRepository) RevokeToken(token models.RevokedToken) error {
-	err := r.DB.Create(&token).Error
-	if err != nil {
-		r.logger.Error("Unable to insert revoked token. ERR: ", err)
-		return errors.New("unable to revoke token")
-	}
-
-	return nil
 }
 
 func (r *TokenRepository) GenerateSubject(username string, userID uint) string {
