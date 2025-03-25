@@ -79,14 +79,34 @@ func (h *ExternalSystemHandler) Auth(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *ExternalSystemHandler) Register(w http.ResponseWriter, r *http.Request) {
-	var authServiceRequest dto.RegisterExtSystemRequest
+	var response dto.GenericResponse
+	var registerRequest dto.RegisterExtSystemRequest
 
-	if err := render.DecodeJSON(r.Body, &authServiceRequest); err != nil {
+	if err := render.DecodeJSON(r.Body, &registerRequest); err != nil {
 		render.Status(r, http.StatusBadRequest)
 		render.JSON(w, r, map[string]string{"error": "Invalid request"})
 		return
 	}
 
+	accessKey, err := h.ExternalSysService.Register(registerRequest.SystemName)
+	if err != nil {
+		response = dto.GenericResponse{
+			Status:  "Fail",
+			Message: err.Error(),
+		}
+
+		render.Status(r, http.StatusInternalServerError)
+		render.JSON(w, r, response)
+		return
+	}
+
+	response = dto.GenericResponse{
+		Status:  "Success",
+		Message: accessKey,
+	}
+
+	render.Status(r, http.StatusOK)
+	render.JSON(w, r, response)
 }
 
 func (h *ExternalSystemHandler) Deauth(w http.ResponseWriter, r *http.Request) {
