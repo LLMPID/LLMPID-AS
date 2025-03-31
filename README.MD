@@ -5,6 +5,32 @@ The project provides an HTTP API that allows other systems (or users) to detect 
 
 Important: The current version is a PoC and lacks authentication and authorization functionalities. It can still be implemented as an internal service.
 
+```ascii
+An example usage of LLMPID-AS:
+
+
+
+                                                +-----------+
+                                                |           |
+                                                | LLMPID-AS |                                               
+                                                |           |
+                                                +-----------+
+                                                     /\
+                                                     ||
+                                                     ||
+                                                     || 2. Is the User's prompt an injection?
+                                                     ||                                                                                                          
+                                                     ||
+                                                     \/
++-----------------+                             +----------+
+|                 |                             |          |                    +----------+
+|                 |       1. User Prompt        |          |   3. Pass to LLM   |          |
+| External System |<--------------------------->| Your API |<------------------>| Your LLM |
+| (Bank Chat Bot) |                             |          |                    |          |
+|                 |                             |          |                    +----------+
++-----------------+                             +----------+
+```
+
 
 # Quick Look
 [![Quick demo video](thumbnail.png)](https://drive.google.com/file/d/1P0fm3jR95rMjau5_tkkIDqcQvDF7wWWd/view?usp=sharing)
