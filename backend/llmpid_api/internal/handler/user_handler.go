@@ -111,6 +111,12 @@ func (h *UserHandler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 	parts := strings.Split(authHeader, " ")
 	tokenString := parts[1]
 
+	if err := render.DecodeJSON(r.Body, &changePasswordRequest); err != nil {
+		render.Status(r, http.StatusBadRequest)
+		render.JSON(w, r, map[string]string{"error": "Invalid request"})
+		return
+	}
+
 	// Change password and retrieve the new access token for the new session.
 	newJWT, err := h.AuthService.ChangePassword(
 		changePasswordRequest.Username,
@@ -121,6 +127,13 @@ func (h *UserHandler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		resp := dto.GenericResponse{Status: "Fail", Message: err.Error()}
 
+		render.Status(r, http.StatusInternalServerError)
+		render.JSON(w, r, resp)
+		return
+	}
+
+	if newJWT == "" {
+		resp := dto.GenericResponse{Status: "Fail", Message: "Credentials issue."}
 		render.Status(r, http.StatusInternalServerError)
 		render.JSON(w, r, resp)
 		return

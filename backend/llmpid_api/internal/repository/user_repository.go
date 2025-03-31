@@ -22,7 +22,7 @@ func (r *UserRepository) InsertUser(username string, passwordHash string, role s
 
 	err := r.DB.Create(&user).Error
 	if err != nil {
-		r.logger.Error("Unable to insert user objeect into the database. ERR: ", err)
+		r.logger.Error("Unable to insert user objeect into the database. ERR: ", err.Error())
 		return user, errors.New("unable to insert object")
 	}
 
@@ -30,9 +30,9 @@ func (r *UserRepository) InsertUser(username string, passwordHash string, role s
 }
 
 func (r *UserRepository) UpdatePasswordHashByUserID(id uint, passwordHash string) error {
-	err := r.DB.Model(&models.User{}).Where("id = ?", id).Update("password_hash", passwordHash)
+	err := r.DB.Model(&models.User{}).Where("id = ?", id).Update("password_hash", passwordHash).Error
 	if err != nil {
-		r.logger.Error("Unable to update user's password hash. ERR: ", err)
+		r.logger.Error("Unable to update user's password hash. ERR: ", err.Error())
 		return errors.New("unalbe to update password")
 	}
 
