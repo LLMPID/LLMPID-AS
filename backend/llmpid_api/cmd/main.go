@@ -43,27 +43,31 @@ func main() {
 	userRepo := repository.NewUserRepository(db, log)
 	tokenRepo := repository.NewTokenRepository(serverSecretKey, db, log)
 	cryptoRepo := repository.NewCryptoRepository(log)
+	sessionRepo := repository.NewSessionRepository(db, log)
 	log.Info("Instantiate repositories.")
 
 	// Instantiate services
 	classficationService := service.NewClassificationService(classificationLogsRepo, internalClassifierRepo)
 	tokenService := service.NewTokenService(tokenRepo)
-	authService := service.NewAuthenticationService(userRepo, tokenRepo, cryptoRepo)
+	authService := service.NewAuthenticationService(userRepo, tokenRepo, cryptoRepo, sessionRepo)
+	extSystemService := service.NewExternalSystemService(cryptoRepo, userRepo, log)
 
 	log.Info("Instantiate services.")
 
 	// Insatntiate middlewares
-	authMiddleware := middleware.NewAuthMiddleware(tokenService)
+	authMiddleware := middleware.NewAuthMiddleware(tokenService, authService)
 
 	// Instantiate handlers
 	classificationHandler := handler.NewClassificationHandler(classficationService, authMiddleware)
 	userHandler := handler.NewUserHandler(authService, authMiddleware)
+	extSysHandler := handler.NewExternalSystemHandler(extSystemService, authService, authMiddleware)
 
 	// Map handlers to routes
 	// {handler_route}:{handler}
 	handlers := map[string]pkg.Handler{
-		"classification": classificationHandler,
-		"user":           userHandler,
+		"classification":  classificationHandler,
+		"user":            userHandler,
+		"system/external": extSysHandler,
 		// Add more handlers
 	}
 	router := pkg.NewRouter(handlers, log)

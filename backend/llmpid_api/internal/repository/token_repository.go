@@ -59,13 +59,15 @@ func (r *TokenRepository) ExtractAndValidateJWT(tokenString string) (*models.Acc
 	return claims, nil
 }
 
-func (r *TokenRepository) GenerateJWT(username string, userID uint, expiration int, role string, sessionSlug string) (string, models.AccessTokenClaims, error) {
+func (r *TokenRepository) GenerateJWT(username string, userID uint, expiration int64, role string, sessionSlug string) (string, models.AccessTokenClaims, error) {
 	now := time.Now()
 
+	sub := r.GenerateSubject(username, userID)
 	accessClaims := models.AccessTokenClaims{
-		Sub: r.GenerateSubject(username, userID),
+		Sub: sub,
 		Data: map[string]string{
-			"role": role,
+			"username": username,
+			"role":     role,
 		},
 		SessionID: sessionSlug,
 		RegisteredClaims: jwt.RegisteredClaims{

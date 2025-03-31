@@ -30,14 +30,16 @@ func NewUserHandler(authService *service.AuthenticationService, authMiddleware *
 func (h *UserHandler) Routes() chi.Router {
 	r := chi.NewRouter()
 
-	r.Post("/auth", h.Auth)
-	r.With(h.AuthMiddleware.Authenticate([]string{"user"})).Post("/register", h.Register)
-	r.With(h.AuthMiddleware.Authenticate([]string{"user"})).Put("/logout", h.Logout)
-
+	r.Route("/auth", func(r chi.Router) {
+		r.Post("/login", h.Login)
+		r.With(h.AuthMiddleware.Authenticate([]string{"user"})).Put("/logout", h.Logout)
+		r.With(h.AuthMiddleware.Authenticate([]string{"user"})).Post("/register", h.Register)
+		r.With(h.AuthMiddleware.Authenticate([]string{"user"})).Post("/credentials/change", h.ChangePassword)
+	})
 	return r
 }
 
-func (h *UserHandler) Auth(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 	var loginRequest dto.AuthUserRequest
 
 	if err := render.DecodeJSON(r.Body, &loginRequest); err != nil {
@@ -106,12 +108,53 @@ func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r, userDTO)
 }
 
+func (h *UserHandler) ChangePassword(w http.ResponseWriter, r *http.Request) {
+	var changePasswordRequest dto.ChangeCredentialsRequest
+
+	// Get auth header
+	authHeader := r.Header.Get("Authorization")
+	parts := strings.Split(authHeader, " ")
+	tokenString := parts[1]
+
+	// Change password and retrieve the new access token for the new session.
+	newAccessToken, err := h.AuthService.ChangePassword(
+		changePasswordRequest.Username,
+		changePasswordRequest.OldPassword,
+		changePasswordRequest.NewPassword,
+		tokenString,
+	)
+	if err != nil {
+		resp := dto.GenericResponse{Status: "Fail", Message: err.Error()}
+
+		render.Status(r, http.StatusInternalServerError)
+		render.JSON(w, r, resp)
+		return
+	}
+
+	resp := dto.GenericResponse{
+		Status:  "Success",
+		Message: newAccessToken,
+	}
+
+	render.Status(r, http.StatusOK)
+	render.JSON(w, r, resp)
+}
+
 func (h *UserHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	authHeader := r.Header.Get("Authorization")
 	parts := strings.Split(authHeader, " ")
 	tokenString := parts[1]
 
-	err := h.AuthService.RevokeSession(tokenString)
+	revokeAllTrigger := r.URL.Query().Get("all")
+
+	var err error
+
+	if revokeAllTrigger != "" {
+		err = h.AuthService.RevokeAllSessions(tokenString)
+	} else {
+		err = h.AuthService.RevokeSession(tokenString)
+	}
+
 	if err != nil {
 		resp := dto.GenericResponse{Status: "Fail", Message: err.Error()}
 
@@ -121,5 +164,4 @@ func (h *UserHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	}
 
 	render.Status(r, http.StatusOK)
-
 }

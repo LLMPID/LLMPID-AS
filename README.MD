@@ -46,6 +46,32 @@ It is best to put the service behind a reverse proxy (e.g. NGINX) it will be acc
 
 
 # Endpoints
+## User Authentication
+### Endpoint
+```http 
+POST /api/user/auth
+```
+### Description
+Performs user authentication for the administrator user. Default credentials are `admin`:`changemeasap`, where password must be changed on first login in order to prevent unauthorized usage. Returns JWT Bearer token.
+### Example Request:
+```http
+POST /api/user/auth
+
+{
+  "username": "admin",
+  "password": "changemeasap"
+}
+```
+### Example Response:
+```json
+{
+  "status": "Success",
+  "data": ""
+}
+
+```
+
+
 ## Detect prompt injection
 ### Endpoint:
 ```http

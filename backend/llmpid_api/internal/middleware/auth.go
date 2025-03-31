@@ -15,8 +15,8 @@ type AuthMiddleware struct {
 	authService  *service.AuthenticationService
 }
 
-func NewAuthMiddleware(tokenService *service.TokenService) *AuthMiddleware {
-	return &AuthMiddleware{tokenService: tokenService}
+func NewAuthMiddleware(tokenService *service.TokenService, authService *service.AuthenticationService) *AuthMiddleware {
+	return &AuthMiddleware{tokenService: tokenService, authService: authService}
 }
 
 func (m *AuthMiddleware) Authenticate(requiredRole []string) func(http.Handler) http.Handler {

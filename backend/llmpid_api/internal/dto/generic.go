@@ -1,6 +1,6 @@
 package dto
 
 type GenericResponse struct {
-	Status  string `json:"result"`
+	Status  string `json:"status"`
 	Message string `json:"data"`
 }

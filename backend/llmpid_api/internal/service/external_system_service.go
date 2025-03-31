@@ -11,8 +11,8 @@ type ExternalSystemService struct {
 	logger     *logrus.Logger
 }
 
-func NewExternalSystemService(cryptoRepo *repository.CryptoRepository, logger *logrus.Logger) *ExternalSystemService {
-	return &ExternalSystemService{CryptoRepo: cryptoRepo, logger: logger}
+func NewExternalSystemService(cryptoRepo *repository.CryptoRepository, userRepo *repository.UserRepository, logger *logrus.Logger) *ExternalSystemService {
+	return &ExternalSystemService{CryptoRepo: cryptoRepo, UserRepo: userRepo, logger: logger}
 }
 
 func (s *ExternalSystemService) Register(systemName string) (string, error) {

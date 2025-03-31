@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+	"time"
 
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
@@ -17,12 +18,8 @@ func NewSessionRepository(db *gorm.DB, logger *logrus.Logger) *SessionRepository
 	return &SessionRepository{DB: db, logger: logger}
 }
 
-func (r *SessionRepository) CreateSession(sessionSlug string, sub string) error {
-	if r.IsValidSession(sessionSlug, sub) {
-		return errors.New("user already has a session")
-	}
-
-	session := models.Session{Slug: sessionSlug, Sub: sub}
+func (r *SessionRepository) CreateSession(sessionID string, sub string, expiresAt int64) error {
+	session := models.Session{SessionID: sessionID, Sub: sub, ExpiresAt: expiresAt}
 
 	err := r.DB.Create(&session).Error
 	if err != nil {
@@ -33,36 +30,45 @@ func (r *SessionRepository) CreateSession(sessionSlug string, sub string) error 
 	return nil
 }
 
-func (r *SessionRepository) IsValidSession(sessionSlug string, sub string) bool {
-	session, _ := r.SelectSessionBySlugAndSub(sessionSlug, sub)
+func (r *SessionRepository) IsValidSession(sessionID string, sub string) bool {
+	session, _ := r.SelectSessionBySIDAndSub(sessionID, sub)
+	if (models.Session{} == session) {
+		return false
+	}
 
-	return models.Session{} != session
+	if time.Now().Unix() > session.ExpiresAt {
+		r.DeleteSessionBySub(sessionID)
+		return false
+	}
+
+	return true
 }
 
-func (r *SessionRepository) DeleteSessionBySub(sub string) error {
-	err := r.DB.Where("sub = ?", sub).Delete(&models.Session{})
-	if err != nil {
-		return errors.New("failed to remove session")
-	}
-	return nil
+func (r *SessionRepository) DeleteSessionBySID(slug string) {
+	r.DB.Where("session_id = ?", slug).Delete(&models.Session{})
+}
+
+func (r *SessionRepository) DeleteSessionBySub(sub string) {
+	r.DB.Where("sub = ?", sub).Delete(&models.Session{})
 }
 
 func (r *SessionRepository) SelectSessionBySub(sub string) (models.Session, error) {
-	session := models.Session{}
+	var session models.Session
 
-	err := r.DB.Where("slug = ?", sub).First(&session).Error
+	err := r.DB.Where("sub = ?", sub).First(&session).Error
 	if err != nil {
-		return session, err
+		return models.Session{}, err
 	}
 
 	return session, nil
 }
 
-func (r *SessionRepository) SelectSessionBySlugAndSub(slug string, sub string) (models.Session, error) {
-	session := models.Session{}
+func (r *SessionRepository) SelectSessionBySIDAndSub(slug string, sub string) (models.Session, error) {
+	var session models.Session
 
-	err := r.DB.Where("slug = ? AND sub = ?", slug, sub).First(&session).Error
+	err := r.DB.Where("session_id = ?", slug).Where("sub = ?", sub).First(&session).Error
 	if err != nil {
+		r.logger.Error("Unable to find session by session_id and sub. ERR: ", err)
 		return session, err
 	}
 

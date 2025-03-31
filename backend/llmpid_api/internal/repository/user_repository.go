@@ -29,6 +29,16 @@ func (r *UserRepository) InsertUser(username string, passwordHash string, role s
 	return user, nil
 }
 
+func (r *UserRepository) UpdatePasswordHashByUserID(id uint, passwordHash string) error {
+	err := r.DB.Model(&models.User{}).Where("id = ?", id).Update("password_hash", passwordHash)
+	if err != nil {
+		r.logger.Error("Unable to update user's password hash. ERR: ", err)
+		return errors.New("unalbe to update password")
+	}
+
+	return nil
+}
+
 func (r *UserRepository) SelectUserByUsername(username string) (models.User, error) {
 	var foundUser models.User
 	if err := r.DB.Where("username = ?", username).First(&foundUser).Error; err != nil {

@@ -50,7 +50,7 @@ func (s *ClassificationService) GetClassificationRequestLogByID(id uint) (*model
 func (s *ClassificationService) GetClassificationLogsByPage(page int, limit int, sortBy string) (*[]models.ClassificationLog, error) {
 	var orderBy string
 
-	// Assures that the sortBy parameter is valid. Defaults to "desc" if it is not.
+	// Assure that the sortBy parameter is valid. Defaults to "desc" if it is not.
 	switch sortBy {
 	case "desc", "asc":
 		break
@@ -58,7 +58,7 @@ func (s *ClassificationService) GetClassificationLogsByPage(page int, limit int,
 		sortBy = "desc"
 	}
 
-	// Creates orderBy parameter for the database query.
+	// Create orderBy parameter for the database query.
 	orderBy = fmt.Sprintf("id %s", sortBy)
 
 	clssRequests, err := s.ClassificationLogsRepo.SelectClassificationLogsByPage(page, limit, orderBy)
