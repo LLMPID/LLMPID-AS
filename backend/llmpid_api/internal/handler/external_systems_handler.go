@@ -45,8 +45,8 @@ func (h *ExternalSystemHandler) Auth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// External systems are treated as an user with "ext_sys" role.
-	// 600 days expiration of service auth token. Needs to be withdrawn when not in use.
-	accessToken, err := h.AuthService.Authenticate(authServiceRequest.SystemName, authServiceRequest.AccessKey, 36000)
+	// 500 days expiration of service auth token. Needs to be withdrawn when not in use.
+	accessToken, err := h.AuthService.Authenticate(authServiceRequest.SystemName, authServiceRequest.AccessKey, 720000)
 	if err != nil {
 		response := dto.GenericResponse{
 			Status:  "Failed to authenticate service",

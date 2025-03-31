@@ -42,8 +42,27 @@ docker-compose up -d
 
 
 # HTTPS
-It is best to put the service behind a reverse proxy (e.g. NGINX) it will be accepting external requests on production. In that way, transport-layer encryption will be handled by it.
+LLMPID-AS has authorization on all routes except `/login`, which is reserved for administrator users and external systems.  
 
+Access to authorized routes requires one of two roles: `user` or `ext_sys`, with some routes accessible to both.  
+
+# Authentication and Authorization
+### Roles  
+
+#### `user` Role (Administrator Users)  
+- Grants access to all endpoints.  
+- Access tokens (JWTs) are valid for 60 minutes.  
+
+#### `ext_sys` Role (External Systems)  
+- Assigned to regisgtered third-party services for using classification routes (e.g., external APIs, chatbots).  
+- Can only access routes under `/api/system/external/*` and `/api/classification/*`.  
+- Access tokens (JWTs) are valid for 500 days.  
+
+### Session Management  
+
+Authenticated users and external systems can have multiple active sessions. Access can be revoked:  
+- **Per session** – by supplying the session’s JWT on logout.
+- **For all active sessions** – by revoking all issued tokens.
 
 # Endpoints
 ## User Login
@@ -73,12 +92,13 @@ POST /api/user/auth
 ## User Credentials Change
 ### Requirements
 * Valid session and `Authorization` header.
+* Role `user`.
 ### Endpoint
 ```http 
 POST /api/user/credentials/change
 ```
 ### Description
-
+Changes the password of the administrator user. It is highly recommended to use it after the initial setup and first login. All previous user sessions are revoked after successful credential changes as a security control. Returns a JWT for the new session.
 ### Example Request:
 ```http
 POST /api/user/auth/credentials/change
@@ -100,12 +120,13 @@ POST /api/user/auth/credentials/change
 ## User Logout (Single sesssion/All Active Session)
 ### Requirements
 * Valid session and `Authorization` header.
+* Role `user`.
 ### Endpoint
 ```http 
 PUT /api/user/auth/logout
 ```
 ### Description
-
+Revokes the current user session or all live user sessions. This is determined by the presapresence of the `all=true` URI parameter.
 ### Example Request (Current Session):
 ```http
 PUT /api/user/auth/logout
@@ -123,11 +144,61 @@ PUT /api/user/auth/logout?all=true
 Status 200
 ```
 
+## Register External System
+### Requirements
+* Valid session and `Authorization` header.
+* Role `user`.
+### Endpoint
+```http 
+POST /api/system/external/register
+```
+### Description
+Registers an external system to access the /classification routes of the API. Any third-party service using these routes is considered an 'external system.' The registration process requires a `system_name` parameter, chosen by the user. After successful registration, the API returns a secure access key, which the external system must use for authentication.
+### Example Request (Current Session):
+```http
+POST /api/system/external/register
+
+{
+  "system_name": "chatbot_banking_v0.1"
+}
+```
+### Example Response:
+```HTTP
+{
+  "status": "Success",
+  "access_key": "8657a8f480621ef395de191d4e89741841bb3d2e6d748b20dc6e33dee602cf1c"
+}
+```
+
+## Authenticate External System
+### Endpoint
+```http 
+POST /api/system/external/register
+```
+### Description
+Essentially, this logs in an external system, creates a session, and issues an access token valid for 500 days (as to not be permanent). A system can have multiple active sessions, each of which can be revoked individually or all at once. The token grants access to routes that require the `ext_sys` role.
+### Example Request (Current Session):
+```http
+POST /api/system/external/register
+
+{
+  "system_name": "chatbot_banking_v0.1",
+  "access_key": "8657a8f480621ef395de191d4e89741841bb3d2e6d748b20dc6e33dee602cf1c"
+}
+```
+### Example Response:
+```HTTP
+{
+    "status": "Success",
+    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwNTdmZTZjYmRmYWU5OTE5MWViNmI2Yzk2ZmZlYjMzMzg5YjAzZTY3NGQzZTRmZThiMWE0MjI0ZTUxZGVhZDNmIiwiZGF0YSI6eyJyb2xlIjoiZXh0X3N5cyIsInVzZXJuYW1lIjoidGVzdF9zeXN0ZW0ifSwic2Vzc2lvbl9pZCI6IjMxNGJiNzIxYzhjYmQ5ODU5NTc0OWI5ZDM3NjU1ZDhmNmMwZTk2MjliYzdmODdmNzVhNjVlOGYyNWY2NjM3N2QiLCJpc3MiOiJsbG1waWQtYXBpLXNlcnZpY2UiLCJleHAiOjE3NDU2MDkxNDgsIm5iZiI6MTc0MzQ0OTE0OCwiaWF0IjoxNzQzNDQ5MTQ4fQ.uhMEi9fVHvyok9hma8eXMPbtBuAY8-pTaqspmQAo4XE"
+}
+```
 
 
 ## Detect prompt injection
 ### Requirements
 * Valid session and `Authorization` header.
+* Role `user` or `ext_sys`.
 ### Endpoint:
 ```http
 POST /api/classification 
@@ -189,6 +260,7 @@ POST /api/classification
 ## Get classification logs
 ### Requirements
 * Valid session and `Authorization` header.
+* Role `user` or `ext_sys`.
 ### Endpoint
 ```http
 GET /api/classification/logs
@@ -226,6 +298,7 @@ GET /api/classification/logs?page=1&limit=2&sortBy=desc
 ## Get single classification log by ID
 ### Requirements
 * Valid session and `Authorization` header.
+* Role `user` or `ext_sys`.
 ### Endpoint
 ```http
 GET /api/classification/logs/{id}
