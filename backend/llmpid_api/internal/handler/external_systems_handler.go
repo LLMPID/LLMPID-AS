@@ -69,13 +69,8 @@ func (h *ExternalSystemHandler) Auth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := dto.GenericResponse{
-		Status:  "Success",
-		Message: accessToken,
-	}
-
 	render.Status(r, http.StatusOK)
-	render.JSON(w, r, response)
+	render.JSON(w, r, map[string]string{"status": "Success", "access_token": accessToken})
 }
 
 func (h *ExternalSystemHandler) Register(w http.ResponseWriter, r *http.Request) {
@@ -100,13 +95,8 @@ func (h *ExternalSystemHandler) Register(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	response = dto.GenericResponse{
-		Status:  "Success",
-		Message: accessKey,
-	}
-
 	render.Status(r, http.StatusOK)
-	render.JSON(w, r, response)
+	render.JSON(w, r, map[string]string{"status": "Success", "access_key": accessKey})
 }
 
 func (h *ExternalSystemHandler) Deauth(w http.ResponseWriter, r *http.Request) {

@@ -33,7 +33,7 @@ func (h *UserHandler) Routes() chi.Router {
 	r.Route("/auth", func(r chi.Router) {
 		r.Post("/login", h.Login)
 		r.With(h.AuthMiddleware.Authenticate([]string{"user"})).Put("/logout", h.Logout)
-		r.With(h.AuthMiddleware.Authenticate([]string{"user"})).Post("/register", h.Register)
+		//r.With(h.AuthMiddleware.Authenticate([]string{"user"})).Post("/register", h.Register)
 		r.With(h.AuthMiddleware.Authenticate([]string{"user"})).Post("/credentials/change", h.ChangePassword)
 	})
 	return r
@@ -72,13 +72,8 @@ func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := dto.GenericResponse{
-		Status:  "Success",
-		Message: jwt,
-	}
-
 	render.Status(r, http.StatusOK)
-	render.JSON(w, r, response)
+	render.JSON(w, r, map[string]string{"status": "Success", "access_token": jwt})
 }
 
 func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
@@ -117,7 +112,7 @@ func (h *UserHandler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 	tokenString := parts[1]
 
 	// Change password and retrieve the new access token for the new session.
-	newAccessToken, err := h.AuthService.ChangePassword(
+	newJWT, err := h.AuthService.ChangePassword(
 		changePasswordRequest.Username,
 		changePasswordRequest.OldPassword,
 		changePasswordRequest.NewPassword,
@@ -131,13 +126,8 @@ func (h *UserHandler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp := dto.GenericResponse{
-		Status:  "Success",
-		Message: newAccessToken,
-	}
-
 	render.Status(r, http.StatusOK)
-	render.JSON(w, r, resp)
+	render.JSON(w, r, map[string]string{"status": "Success", "access_token": newJWT})
 }
 
 func (h *UserHandler) Logout(w http.ResponseWriter, r *http.Request) {

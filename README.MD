@@ -46,10 +46,10 @@ It is best to put the service behind a reverse proxy (e.g. NGINX) it will be acc
 
 
 # Endpoints
-## User Authentication
+## User Login
 ### Endpoint
 ```http 
-POST /api/user/auth
+POST /api/user/auth/login
 ```
 ### Description
 Performs user authentication for the administrator user. Default credentials are `admin`:`changemeasap`, where password must be changed on first login in order to prevent unauthorized usage. Returns JWT Bearer token.
@@ -66,13 +66,68 @@ POST /api/user/auth
 ```json
 {
   "status": "Success",
-  "data": ""
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwNTdmZTZjYmRmYWU5OTE5MWViNmI2Yzk2ZmZlYjMzMzg5YjAzZTY3NGQzZTRmZThiMWE0MjI0ZTUxZGVhZDNmIiwiZGF0YSI6eyJyb2xlIjoiZXh0X3N5cyIsInVzZXJuYW1lIjoidGVzdF9zeXN0ZW0ifSwic2Vzc2lvbl9pZCI6IjE0MTEwZDMwOTEwYjMyY2JmZTliMGRlY2UyZTg2NTVmNTY3NjM3YTE2OWIyNDY0YWU0NjllZDU3MWE5OTBjYmIiLCJpc3MiOiJsbG1waWQtYXBpLXNlcnZpY2UiLCJleHAiOjE3NDU2MDQwMDYsIm5iZiI6MTc0MzQ0NDAwNiwiaWF0IjoxNzQzNDQ0MDA2fQ.fpizB7hihWpCRdJ41n0G1rEbhMDK48WJqw4OYqOqZJ8"
 }
+```
 
+## User Credentials Change
+### Requirements
+* Valid session and `Authorization` header.
+### Endpoint
+```http 
+POST /api/user/credentials/change
+```
+### Description
+
+### Example Request:
+```http
+POST /api/user/auth/credentials/change
+
+{
+  "username": "admin",
+  "old_password": "changemeasap",
+  "new_password": "changed-t0-n3wPass"
+}
+```
+### Example Response:
+```json
+{
+  "status": "Success",
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwNTdmZTZjYmRmYWU5OTE5MWViNmI2Yzk2ZmZlYjMzMzg5YjAzZTY3NGQzZTRmZThiMWE0MjI0ZTUxZGVhZDNmIiwiZGF0YSI6eyJyb2xlIjoiZXh0X3N5cyIsInVzZXJuYW1lIjoidGVzdF9zeXN0ZW0ifSwic2Vzc2lvbl9pZCI6IjE0MTEwZDMwOTEwYjMyY2JmZTliMGRlY2UyZTg2NTVmNTY3NjM3YTE2OWIyNDY0YWU0NjllZDU3MWE5OTBjYmIiLCJpc3MiOiJsbG1waWQtYXBpLXNlcnZpY2UiLCJleHAiOjE3NDU2MDQwMDYsIm5iZiI6MTc0MzQ0NDAwNiwiaWF0IjoxNzQzNDQ0MDA2fQ.fpizB7hihWpCRdJ41n0G1rEbhMDK48WJqw4OYqOqZJ8"
+}
+```
+
+## User Logout (Single sesssion/All Active Session)
+### Requirements
+* Valid session and `Authorization` header.
+### Endpoint
+```http 
+PUT /api/user/auth/logout
+```
+### Description
+
+### Example Request (Current Session):
+```http
+PUT /api/user/auth/logout
+```
+### Example Response:
+```HTTP
+Status 200
+```
+### Example Request (All Active Sessions):
+```http
+PUT /api/user/auth/logout?all=true
+```
+### Example Response:
+```HTTP
+Status 200
 ```
 
 
+
 ## Detect prompt injection
+### Requirements
+* Valid session and `Authorization` header.
 ### Endpoint:
 ```http
 POST /api/classification 
@@ -132,6 +187,8 @@ POST /api/classification
 ```
 
 ## Get classification logs
+### Requirements
+* Valid session and `Authorization` header.
 ### Endpoint
 ```http
 GET /api/classification/logs
@@ -167,6 +224,8 @@ GET /api/classification/logs?page=1&limit=2&sortBy=desc
 ```
 
 ## Get single classification log by ID
+### Requirements
+* Valid session and `Authorization` header.
 ### Endpoint
 ```http
 GET /api/classification/logs/{id}
