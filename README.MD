@@ -220,6 +220,22 @@ POST /api/system/external/register
 }
 ```
 
+## Logout (Deauth) External System
+### Endpoint
+```http 
+PUT /api/system/external/deauth
+```
+### Description
+Revokes all active sessions for the deauthenticated external system, rendering all associated access tokens unusable.
+### Example Request (Current Session):
+```http
+PUT /api/system/external/deauth
+```
+### Example Response:
+```HTTP
+ Status 200
+```
+
 
 ## Detect prompt injection
 ### Requirements

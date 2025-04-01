@@ -30,7 +30,7 @@ func (h *ExternalSystemHandler) Routes() chi.Router {
 
 	r.Post("/auth", h.Auth)
 	r.With(h.AuthMiddleware.Authenticate([]string{"user"})).Post("/register", h.Register)
-	r.With(h.AuthMiddleware.Authenticate([]string{"user", "ext_sys"})).Put("/logout", h.Deauth)
+	r.With(h.AuthMiddleware.Authenticate([]string{"user", "ext_sys"})).Put("/deauth", h.Deauth)
 
 	return r
 }
@@ -104,7 +104,7 @@ func (h *ExternalSystemHandler) Deauth(w http.ResponseWriter, r *http.Request) {
 	parts := strings.Split(authHeader, " ")
 	tokenString := parts[1]
 
-	err := h.AuthService.RevokeSession(tokenString)
+	err := h.AuthService.RevokeAllSessions(tokenString)
 	if err != nil {
 		resp := dto.GenericResponse{Status: "Fail", Message: err.Error()}
 
