@@ -29,7 +29,7 @@ func (h *ExternalSystemHandler) Routes() chi.Router {
 	r := chi.NewRouter()
 
 	r.Post("/auth", h.Auth)
-	r.With(h.AuthMiddleware.Authenticate([]string{"user"})).Post("/register", h.Register)
+	r.With(h.AuthMiddleware.Authenticate([]string{"user"})).Post("/", h.Create)
 	r.With(h.AuthMiddleware.Authenticate([]string{"user", "ext_sys"})).Put("/deauth", h.Deauth)
 
 	return r
@@ -73,7 +73,7 @@ func (h *ExternalSystemHandler) Auth(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r, map[string]string{"status": "Success", "access_token": accessToken})
 }
 
-func (h *ExternalSystemHandler) Register(w http.ResponseWriter, r *http.Request) {
+func (h *ExternalSystemHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var response dto.GenericResponse
 	var registerRequest dto.RegisterExtSystemRequest
 

@@ -176,7 +176,7 @@ Status 200
 * Role `user`.
 ### Endpoint
 ```http 
-POST /api/system/external/register
+POST /api/system/external
 ```
 ### Description
 Registers an external system to access the /classification routes of the API. Any third-party service using these routes is considered an 'external system.' The registration process requires a `system_name` parameter, chosen by the user. After successful registration, the API returns a secure access key, which the external system must use for authentication.
