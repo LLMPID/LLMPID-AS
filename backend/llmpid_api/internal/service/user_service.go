@@ -14,7 +14,7 @@ func NewUserService(userRepo *repository.UserRepository, cryptoRepo *repository.
 	return &UserService{UserRepo: userRepo, CryptoRepo: cryptoRepo}
 }
 
-func (s *UserService) CreateUser(username string, password string, role string) (models.User, error) {
+func (s *UserService) Create(username string, password string, role string) (models.User, error) {
 	var user models.User
 
 	passwordHash, err := s.CryptoRepo.HashSaltString(password)

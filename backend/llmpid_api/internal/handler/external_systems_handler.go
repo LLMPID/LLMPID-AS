@@ -30,6 +30,7 @@ func (h *ExternalSystemHandler) Routes() chi.Router {
 
 	r.With(h.AuthMiddleware.Authenticate([]string{"admin"})).Post("/", h.Create)
 	r.With(h.AuthMiddleware.Authenticate([]string{"admin"})).Get("/", h.List)
+	r.With(h.AuthMiddleware.Authenticate([]string{"admin"})).Delete("/{system_name}", h.Delete)
 
 	r.Route("/auth", func(r chi.Router) {
 		r.Post("/authenticate", h.Auth)
@@ -135,6 +136,30 @@ func (h *ExternalSystemHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 	render.Status(r, http.StatusOK)
 	render.JSON(w, r, map[string]string{"status": "Success", "access_key": "accessKey"})
+}
+
+func (h *ExternalSystemHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	systemName := chi.URLParam(r, "system_name")
+
+	err := h.ExternalSysService.DeleteBySysName(systemName)
+	if err != nil {
+		resp := dto.GenericResponse{Status: "Fail", Message: err.Error()}
+
+		render.Status(r, http.StatusInternalServerError)
+		render.JSON(w, r, resp)
+		return
+	}
+
+	err = h.AuthService.RevokeAllSessionsByUsername(systemName)
+	if err != nil {
+		resp := dto.GenericResponse{Status: "Fail", Message: "failed to revoke sessions"}
+
+		render.Status(r, http.StatusInternalServerError)
+		render.JSON(w, r, resp)
+		return
+	}
+
+	render.Status(r, http.StatusOK)
 }
 
 func (h *ExternalSystemHandler) Deauth(w http.ResponseWriter, r *http.Request) {

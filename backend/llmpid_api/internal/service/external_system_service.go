@@ -52,3 +52,7 @@ func (s *ExternalSystemService) List() ([]string, error) {
 
 	return services, nil
 }
+
+func (s *ExternalSystemService) DeleteBySysName(username string) error {
+	return s.UserRepo.DeleteByUsername(username)
+}

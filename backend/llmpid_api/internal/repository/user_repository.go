@@ -51,10 +51,19 @@ func (r *UserRepository) SelectUserByRole(role string) ([]models.User, error) {
 	var users []models.User
 
 	if err := r.DB.Where("role = ?", role).Find(&users).Error; err != nil {
-		r.logger.Error("Failed to retrieve classification log from database.")
+		r.logger.Error("Failed to retrieve user by role. ERR: ", err.Error())
 		return users, err
 	}
 
 	return users, nil
 
+}
+
+func (r *UserRepository) DeleteByUsername(username string) error {
+	if err := r.DB.Where("username = ?", username).Delete(&models.User{}).Error; err != nil {
+		r.logger.Error("Failed to delete user from database. ERR: ", err.Error())
+		return errors.New("unable to delete object")
+	}
+
+	return nil
 }

@@ -84,7 +84,7 @@ func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.UserService.CreateUser(registerRequest.Usernames, registerRequest.Usernames, "admin")
+	user, err := h.UserService.Create(registerRequest.Usernames, registerRequest.Usernames, "admin")
 	if err != nil {
 		render.Status(r, http.StatusBadRequest)
 		render.JSON(w, r, map[string]string{"error": "Failed to create user"})
