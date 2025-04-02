@@ -70,12 +70,12 @@ docker-compose up -d
 # HTTPS
 LLMPID-AS has authorization on all routes except `/login`, which is reserved for administrator users and external systems.  
 
-Access to authorized routes requires one of two roles: `user` or `ext_sys`, with some routes accessible to both.  
+Access to authorized routes requires one of two roles: `admin` or `ext_sys`, with some routes accessible to both.  
 
 # Authentication and Authorization
 ### Roles  
 
-#### `user` Role (Administrator Users)  
+#### `admin` Role (Administrator Users)  
 - Grants access to all endpoints.  
 - Access tokens (JWTs) are valid for 60 minutes.  
 
@@ -118,7 +118,7 @@ POST /api/user/auth
 ## User Credentials Change
 ### Requirements
 * Valid session and `Authorization` header.
-* Role `user`.
+* Role `admin`.
 ### Endpoint
 ```http 
 POST /api/user/credentials/change
@@ -146,7 +146,7 @@ POST /api/user/auth/credentials/change
 ## User Logout (Single sesssion/All Active Session)
 ### Requirements
 * Valid session and `Authorization` header.
-* Role `user`.
+* Role `admin`.
 ### Endpoint
 ```http 
 PUT /api/user/auth/logout
@@ -173,7 +173,7 @@ Status 200
 ## Register External System
 ### Requirements
 * Valid session and `Authorization` header.
-* Role `user`.
+* Role `admin`.
 ### Endpoint
 ```http 
 POST /api/system/external
@@ -220,6 +220,32 @@ POST /api/system/external/auth/authenticate
 }
 ```
 
+
+## List Registered External Systems
+### Requirements
+* Valid session and `Authorization` header.
+* Role `admin`.
+### Endpoint
+```http 
+GET /api/system/external
+```
+### Description
+Lists all available registered external systems.
+### Example Request (Current Session):
+```http
+GET /api/system/external
+```
+### Example Response:
+```HTTP
+{
+    [
+      "system_name":"banking-bot-123",
+      "system_name":"ecom-chat-assistant"
+    ]
+
+}
+```
+
 ## Logout (Deauth) External System
 ### Endpoint
 ```http 
@@ -236,11 +262,30 @@ PUT /api/system/external/auth/deauthenticate
  Status 200
 ```
 
+## Revoke Access of External System by System Name
+### Requirements
+* Valid session and `Authorization` header.
+* Role `admin`.
+### Endpoint
+```http 
+PUT /api/system/external/auth/deauthenticate/{system_name}
+```
+### Description
+Revokes all active sessions for the deauthenticated external system, rendering all associated access tokens unusable. `system_name` is the name of the external system that will be deauthenticated forcefully.
+### Example Request (Current Session):
+```http
+PUT /api/system/external/auth/deauthenticate/test-system-bank-bot
+```
+### Example Response:
+```HTTP
+ Status 200
+```
+
 
 ## Detect prompt injection
 ### Requirements
 * Valid session and `Authorization` header.
-* Role `user` or `ext_sys`.
+* Role `admin` or `ext_sys`.
 ### Endpoint:
 ```http
 POST /api/classification 
@@ -302,7 +347,7 @@ POST /api/classification
 ## Get classification logs
 ### Requirements
 * Valid session and `Authorization` header.
-* Role `user` or `ext_sys`.
+* Role `admin` or `ext_sys`.
 ### Endpoint
 ```http
 GET /api/classification/logs
@@ -340,7 +385,7 @@ GET /api/classification/logs?page=1&limit=2&sortBy=desc
 ## Get single classification log by ID
 ### Requirements
 * Valid session and `Authorization` header.
-* Role `user` or `ext_sys`.
+* Role `admin` or `ext_sys`.
 ### Endpoint
 ```http
 GET /api/classification/logs/{id}

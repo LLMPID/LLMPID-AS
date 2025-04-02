@@ -28,9 +28,9 @@ func NewExternalSystemHandler(externalSysService *service.ExternalSystemService,
 func (h *ExternalSystemHandler) Routes() chi.Router {
 	r := chi.NewRouter()
 
-	r.Post("/auth/authenticate", h.Auth)
 	r.With(h.AuthMiddleware.Authenticate([]string{"admin"})).Post("/", h.Create)
 	r.With(h.AuthMiddleware.Authenticate([]string{"admin"})).Get("/", h.List)
+	r.Post("/auth/authenticate", h.Auth)
 	r.With(h.AuthMiddleware.Authenticate([]string{"admin"})).Put("/auth/deauthenticate/{system_name}", h.DeauthByName)
 	r.With(h.AuthMiddleware.Authenticate([]string{"ext_sys"})).Put("/auth/deauthenticate", h.Deauth)
 	return r
