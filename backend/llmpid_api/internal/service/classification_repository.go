@@ -22,32 +22,32 @@ func NewClassificationService(logsRepo *repository.ClassificationLogsRepository,
 
 // ClassifyText performs prompt injection classification for a privded string.
 // First, it sends the string for classification to an internal API, retrieves and logs the result into a database, and then returns it to the client service.
-func (s *ClassificationService) ClassifyText(ClassificationLog dto.ClassificationRequest) (*models.ClassificationLog, error) {
+func (s *ClassificationService) ClassifyText(ClassificationLog dto.ClassificationRequest) (models.ClassificationLog, error) {
 	// Send data for classification.
 	clssResult, err := s.ClassificationRepo.SendClassificationRequest(ClassificationLog)
 	if err != nil {
-		return nil, err
+		return models.ClassificationLog{}, err
 	}
 
 	// Create a classification log with the request and result and make a DB entry.
-	clssRequest := &models.ClassificationLog{RequestText: ClassificationLog.Text, Result: clssResult}
+	clssRequest := models.ClassificationLog{RequestText: ClassificationLog.Text, Result: clssResult}
 	err = s.ClassificationLogsRepo.InsertClassificationLog(clssRequest)
 	if err != nil {
-		return nil, err
+		return models.ClassificationLog{}, err
 	}
 
 	return clssRequest, nil
 }
 
-func (s *ClassificationService) GetClassificationRequestLogByID(id uint) (*models.ClassificationLog, error) {
+func (s *ClassificationService) GetClassificationRequestLogByID(id uint) (models.ClassificationLog, error) {
 	clssRequest, err := s.ClassificationLogsRepo.SelectClassificationLogByID(id)
 	if err != nil {
-		return nil, err
+		return models.ClassificationLog{}, err
 	}
 	return clssRequest, nil
 }
 
-func (s *ClassificationService) GetClassificationLogsByPage(page int, limit int, sortBy string) (*[]models.ClassificationLog, error) {
+func (s *ClassificationService) GetClassificationLogsByPage(page int, limit int, sortBy string) ([]models.ClassificationLog, error) {
 	var orderBy string
 
 	// Assure that the sortBy parameter is valid. Defaults to "desc" if it is not.
@@ -63,7 +63,7 @@ func (s *ClassificationService) GetClassificationLogsByPage(page int, limit int,
 
 	clssRequests, err := s.ClassificationLogsRepo.SelectClassificationLogsByPage(page, limit, orderBy)
 	if err != nil {
-		return nil, err
+		return []models.ClassificationLog{}, err
 	}
 
 	return clssRequests, nil

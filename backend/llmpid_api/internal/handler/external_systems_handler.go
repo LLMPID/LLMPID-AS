@@ -28,9 +28,10 @@ func NewExternalSystemHandler(externalSysService *service.ExternalSystemService,
 func (h *ExternalSystemHandler) Routes() chi.Router {
 	r := chi.NewRouter()
 
-	r.Post("/auth", h.Auth)
+	r.Post("/auth/authenticate", h.Auth)
 	r.With(h.AuthMiddleware.Authenticate([]string{"user"})).Post("/", h.Create)
-	r.With(h.AuthMiddleware.Authenticate([]string{"user", "ext_sys"})).Put("/deauth", h.Deauth)
+	r.With(h.AuthMiddleware.Authenticate([]string{"user"})).Get("/", h.List)
+	r.With(h.AuthMiddleware.Authenticate([]string{"user", "ext_sys"})).Put("/auth/deauthenticate", h.Deauth)
 
 	return r
 }
@@ -97,6 +98,40 @@ func (h *ExternalSystemHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	render.Status(r, http.StatusOK)
 	render.JSON(w, r, map[string]string{"status": "Success", "access_key": accessKey})
+}
+func (h *ExternalSystemHandler) List(w http.ResponseWriter, r *http.Request) {
+	servicesNames, err := h.ExternalSysService.List()
+	if err != nil {
+		response := dto.GenericResponse{
+			Status:  "Fail",
+			Message: err.Error(),
+		}
+
+		render.Status(r, http.StatusInternalServerError)
+		render.JSON(w, r, response)
+		return
+	}
+
+	render.Status(r, http.StatusOK)
+	render.JSON(w, r, servicesNames)
+}
+
+func (h *ExternalSystemHandler) Update(w http.ResponseWriter, r *http.Request) {
+	var updateExternalSystemRequest dto.RegisterExtSystemRequest // The update request is the same as the register one. We use the same DTO.
+
+	if err := render.DecodeJSON(r.Body, &updateExternalSystemRequest); err != nil {
+		render.Status(r, http.StatusBadRequest)
+		render.JSON(w, r, map[string]string{"error": "Invalid request"})
+		return
+	}
+
+	// Check if old system exists
+
+	// Update the name
+	//updatedKey, err := h.ExternalSysService.Update(updateExternalSystemRequest.SystemName)
+
+	render.Status(r, http.StatusOK)
+	render.JSON(w, r, map[string]string{"status": "Success", "access_key": "accessKey"})
 }
 
 func (h *ExternalSystemHandler) Deauth(w http.ResponseWriter, r *http.Request) {

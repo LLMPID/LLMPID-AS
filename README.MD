@@ -182,7 +182,7 @@ POST /api/system/external
 Registers an external system to access the /classification routes of the API. Any third-party service using these routes is considered an 'external system.' The registration process requires a `system_name` parameter, chosen by the user. After successful registration, the API returns a secure access key, which the external system must use for authentication.
 ### Example Request (Current Session):
 ```http
-POST /api/system/external/register
+POST /api/system/external
 
 {
   "system_name": "chatbot_banking_v0.1"
@@ -199,13 +199,13 @@ POST /api/system/external/register
 ## Authenticate External System
 ### Endpoint
 ```http 
-POST /api/system/external/register
+POST /api/system/external/auth/authenticate
 ```
 ### Description
 Essentially, this logs in an external system, creates a session, and issues an access token valid for 500 days (as to not be permanent). A system can have multiple active sessions, each of which can be revoked individually or all at once. The token grants access to routes that require the `ext_sys` role.
 ### Example Request (Current Session):
 ```http
-POST /api/system/external/register
+POST /api/system/external/auth/authenticate
 
 {
   "system_name": "chatbot_banking_v0.1",
@@ -223,13 +223,13 @@ POST /api/system/external/register
 ## Logout (Deauth) External System
 ### Endpoint
 ```http 
-PUT /api/system/external/deauth
+PUT /api/system/external/auth/deauthenticate
 ```
 ### Description
 Revokes all active sessions for the deauthenticated external system, rendering all associated access tokens unusable.
 ### Example Request (Current Session):
 ```http
-PUT /api/system/external/deauth
+PUT /api/system/external/auth/deauthenticate
 ```
 ### Example Response:
 ```HTTP

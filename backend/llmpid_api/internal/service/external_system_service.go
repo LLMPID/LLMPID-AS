@@ -37,3 +37,18 @@ func (s *ExternalSystemService) Register(systemName string) (string, error) {
 
 	return systemAccessKey, nil
 }
+
+func (s *ExternalSystemService) List() ([]string, error) {
+	var services []string
+
+	serviceUsers, err := s.UserRepo.SelectUserByRole("ext_sys")
+	if err != nil {
+		return []string{}, err
+	}
+
+	for _, serviceUser := range serviceUsers {
+		services = append(services, serviceUser.Username)
+	}
+
+	return services, nil
+}

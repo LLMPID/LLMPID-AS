@@ -47,3 +47,14 @@ func (r *UserRepository) SelectUserByUsername(username string) (models.User, err
 
 	return foundUser, nil
 }
+func (r *UserRepository) SelectUserByRole(role string) ([]models.User, error) {
+	var users []models.User
+
+	if err := r.DB.Where("role = ?", role).Find(&users).Error; err != nil {
+		r.logger.Error("Failed to retrieve classification log from database.")
+		return users, err
+	}
+
+	return users, nil
+
+}
