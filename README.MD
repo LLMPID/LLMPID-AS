@@ -185,7 +185,7 @@ Registers an external system to access the /classification routes of the API. An
 POST /api/system/external
 
 {
-  "system_name": "chatbot_banking_v0.1"
+  "system_name": "chatbot_banking_v0-1"
 }
 ```
 ### Example Response:
@@ -194,6 +194,25 @@ POST /api/system/external
   "status": "Success",
   "access_key": "8657a8f480621ef395de191d4e89741841bb3d2e6d748b20dc6e33dee602cf1c"
 }
+```
+
+## Delete External System
+### Requirements
+* Valid session and `Authorization` header.
+* Role `admin`.
+### Endpoint
+```http 
+DELETE /api/system/external/{system_name}
+```
+### Description
+Deletes an external system and revokes all active sessions.
+### Example Request (Current Session):
+```http
+DELETE /api/system/external/chatbot_banking_v0-1
+```
+### Example Response:
+```HTTP
+ Status 200
 ```
 
 ## Authenticate External System
