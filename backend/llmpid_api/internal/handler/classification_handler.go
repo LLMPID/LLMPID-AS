@@ -24,9 +24,9 @@ func NewClassificationHandler(service *service.ClassificationService, authMiddle
 func (h *ClassificationHandler) Routes() chi.Router {
 	r := chi.NewRouter()
 
-	r.With(h.AuthMiddleware.Authenticate([]string{"user", "ext_sys"})).Post("/", h.CreateClassificationRequest)
-	r.With(h.AuthMiddleware.Authenticate([]string{"user", "ext_sys"})).Get("/logs/{id}", h.GetClassificationRequestByID)
-	r.With(h.AuthMiddleware.Authenticate([]string{"user", "ext_sys"})).Get("/logs", h.GetClassificationRequestsByPage)
+	r.With(h.AuthMiddleware.Authenticate([]string{"admin", "ext_sys"})).Post("/", h.CreateClassificationRequest)
+	r.With(h.AuthMiddleware.Authenticate([]string{"admin", "ext_sys"})).Get("/logs/{id}", h.GetClassificationRequestByID)
+	r.With(h.AuthMiddleware.Authenticate([]string{"admin", "ext_sys"})).Get("/logs", h.GetClassificationRequestsByPage)
 
 	return r
 }

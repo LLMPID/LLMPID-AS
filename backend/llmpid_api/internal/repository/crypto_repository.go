@@ -2,8 +2,10 @@ package repository
 
 import (
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/hex"
 	"errors"
+	"fmt"
 
 	"github.com/alexedwards/argon2id"
 	"github.com/sirupsen/logrus"
@@ -47,4 +49,10 @@ func (r *CryptoRepository) IsPassHashMatching(plaintext string, hash string) (bo
 
 	return match, nil
 
+}
+
+func (r *CryptoRepository) GenerateJWTSubject(username string, userID uint) string {
+	hasher := sha256.New()
+	hasher.Write([]byte(fmt.Sprintf("%s-%d", username, userID)))
+	return hex.EncodeToString(hasher.Sum(nil)) // Encrypted-looking subject
 }

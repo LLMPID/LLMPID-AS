@@ -29,10 +29,10 @@ func (h *ExternalSystemHandler) Routes() chi.Router {
 	r := chi.NewRouter()
 
 	r.Post("/auth/authenticate", h.Auth)
-	r.With(h.AuthMiddleware.Authenticate([]string{"user"})).Post("/", h.Create)
-	r.With(h.AuthMiddleware.Authenticate([]string{"user"})).Get("/", h.List)
-	r.With(h.AuthMiddleware.Authenticate([]string{"user", "ext_sys"})).Put("/auth/deauthenticate", h.Deauth)
-
+	r.With(h.AuthMiddleware.Authenticate([]string{"admin"})).Post("/", h.Create)
+	r.With(h.AuthMiddleware.Authenticate([]string{"admin"})).Get("/", h.List)
+	r.With(h.AuthMiddleware.Authenticate([]string{"admin"})).Put("/auth/deauthenticate/{system_name}", h.DeauthByName)
+	r.With(h.AuthMiddleware.Authenticate([]string{"ext_sys"})).Put("/auth/deauthenticate", h.Deauth)
 	return r
 }
 
@@ -139,7 +139,23 @@ func (h *ExternalSystemHandler) Deauth(w http.ResponseWriter, r *http.Request) {
 	parts := strings.Split(authHeader, " ")
 	tokenString := parts[1]
 
-	err := h.AuthService.RevokeAllSessions(tokenString)
+	err := h.AuthService.RevokeAllSessionsByToken(tokenString)
+	if err != nil {
+		resp := dto.GenericResponse{Status: "Fail", Message: err.Error()}
+
+		render.Status(r, http.StatusInternalServerError)
+		render.JSON(w, r, resp)
+		return
+	}
+
+	render.Status(r, http.StatusOK)
+}
+
+func (h *ExternalSystemHandler) DeauthByName(w http.ResponseWriter, r *http.Request) {
+	systemName := chi.URLParam(r, "system_name")
+
+	// systemName == Username in the context of the authentication service.
+	err := h.AuthService.RevokeAllSessionsByUsername(systemName)
 	if err != nil {
 		resp := dto.GenericResponse{Status: "Fail", Message: err.Error()}
 

@@ -41,10 +41,12 @@ func (s *AuthenticationService) Authenticate(username string, password string, s
 	// Generate user session ID (SID) so sessions can be tracked and revoked.
 	sessioID, _ := s.CryptoRepo.GenrateRandomString(32)
 
+	tokenSub := s.CryptoRepo.GenerateJWTSubject(user.Username, user.ID)
+
 	// Generate a new access token for the user.
 	accessToken, claims, err := s.TokenRepo.GenerateJWT(
 		user.Username,
-		user.ID,
+		tokenSub,
 		sessionLength,
 		user.Role,
 		sessioID)
@@ -91,7 +93,7 @@ func (s *AuthenticationService) ChangePassword(username string, oldPassword stri
 	}
 
 	// Revoke old user sessions.
-	err = s.RevokeAllSessions(tokenString)
+	err = s.RevokeAllSessionsByToken(tokenString)
 	if err != nil {
 		return "", err
 	}
@@ -119,12 +121,24 @@ func (s *AuthenticationService) RevokeSession(tokenString string) error {
 	return nil
 }
 
-func (s *AuthenticationService) RevokeAllSessions(tokenString string) error {
+func (s *AuthenticationService) RevokeAllSessionsByToken(tokenString string) error {
 	tokenClaims, err := s.TokenRepo.ExtractAndValidateJWT(tokenString)
 	if err != nil {
 		return err
 	}
 
 	s.SessionRepo.DeleteSessionBySub(tokenClaims.Sub)
+	return nil
+}
+
+func (s *AuthenticationService) RevokeAllSessionsByUsername(username string) error {
+	user, err := s.UserRepo.SelectUserByUsername(username)
+	if err != nil {
+		return err
+	}
+
+	sub := s.CryptoRepo.GenerateJWTSubject(user.Username, user.ID)
+
+	s.SessionRepo.DeleteSessionBySub(sub)
 	return nil
 }

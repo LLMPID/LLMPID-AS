@@ -32,9 +32,9 @@ func (h *UserHandler) Routes() chi.Router {
 
 	r.Route("/auth", func(r chi.Router) {
 		r.Post("/login", h.Login)
-		r.With(h.AuthMiddleware.Authenticate([]string{"user"})).Put("/logout", h.Logout)
+		r.With(h.AuthMiddleware.Authenticate([]string{"admin"})).Put("/logout", h.Logout)
 		//r.With(h.AuthMiddleware.Authenticate([]string{"user"})).Post("/register", h.Register)
-		r.With(h.AuthMiddleware.Authenticate([]string{"user"})).Post("/credentials/change", h.ChangePassword)
+		r.With(h.AuthMiddleware.Authenticate([]string{"admin"})).Post("/credentials/change", h.ChangePassword)
 	})
 	return r
 }
@@ -85,7 +85,7 @@ func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.UserService.CreateUser(registerRequest.Usernames, registerRequest.Usernames, "user")
+	user, err := h.UserService.CreateUser(registerRequest.Usernames, registerRequest.Usernames, "admin")
 	if err != nil {
 		render.Status(r, http.StatusBadRequest)
 		render.JSON(w, r, map[string]string{"error": "Failed to create user"})
@@ -153,7 +153,7 @@ func (h *UserHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	var err error
 
 	if revokeAllTrigger != "" {
-		err = h.AuthService.RevokeAllSessions(tokenString)
+		err = h.AuthService.RevokeAllSessionsByToken(tokenString)
 	} else {
 		err = h.AuthService.RevokeSession(tokenString)
 	}

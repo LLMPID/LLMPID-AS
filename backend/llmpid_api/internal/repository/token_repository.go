@@ -1,10 +1,7 @@
 package repository
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -59,10 +56,9 @@ func (r *TokenRepository) ExtractAndValidateJWT(tokenString string) (*models.Acc
 	return claims, nil
 }
 
-func (r *TokenRepository) GenerateJWT(username string, userID uint, expiration int64, role string, sessionSlug string) (string, models.AccessTokenClaims, error) {
+func (r *TokenRepository) GenerateJWT(username string, sub string, expiration int64, role string, sessionSlug string) (string, models.AccessTokenClaims, error) {
 	now := time.Now()
 
-	sub := r.GenerateSubject(username, userID)
 	accessClaims := models.AccessTokenClaims{
 		Sub: sub,
 		Data: map[string]string{
@@ -86,10 +82,4 @@ func (r *TokenRepository) GenerateJWT(username string, userID uint, expiration i
 	}
 
 	return tokenString, accessClaims, nil
-}
-
-func (r *TokenRepository) GenerateSubject(username string, userID uint) string {
-	hasher := sha256.New()
-	hasher.Write([]byte(fmt.Sprintf("%s-%d", username, userID)))
-	return hex.EncodeToString(hasher.Sum(nil)) // Encrypted-looking subject
 }
