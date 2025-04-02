@@ -30,9 +30,12 @@ func (h *ExternalSystemHandler) Routes() chi.Router {
 
 	r.With(h.AuthMiddleware.Authenticate([]string{"admin"})).Post("/", h.Create)
 	r.With(h.AuthMiddleware.Authenticate([]string{"admin"})).Get("/", h.List)
-	r.Post("/auth/authenticate", h.Auth)
-	r.With(h.AuthMiddleware.Authenticate([]string{"admin"})).Put("/auth/deauthenticate/{system_name}", h.DeauthByName)
-	r.With(h.AuthMiddleware.Authenticate([]string{"ext_sys"})).Put("/auth/deauthenticate", h.Deauth)
+
+	r.Route("/auth", func(r chi.Router) {
+		r.Post("/authenticate", h.Auth)
+		r.With(h.AuthMiddleware.Authenticate([]string{"admin"})).Put("/deauthenticate/{system_name}", h.DeauthByName)
+		r.With(h.AuthMiddleware.Authenticate([]string{"ext_sys"})).Put("/deauthenticate", h.Deauth)
+	})
 	return r
 }
 

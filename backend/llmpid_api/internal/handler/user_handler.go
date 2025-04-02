@@ -33,7 +33,6 @@ func (h *UserHandler) Routes() chi.Router {
 	r.Route("/auth", func(r chi.Router) {
 		r.Post("/login", h.Login)
 		r.With(h.AuthMiddleware.Authenticate([]string{"admin"})).Put("/logout", h.Logout)
-		//r.With(h.AuthMiddleware.Authenticate([]string{"user"})).Post("/register", h.Register)
 		r.With(h.AuthMiddleware.Authenticate([]string{"admin"})).Post("/credentials/change", h.ChangePassword)
 	})
 	return r
