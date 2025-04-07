@@ -31,6 +31,7 @@ func (h *ExternalSystemHandler) Routes() chi.Router {
 	r.With(h.AuthMiddleware.Authenticate([]string{"admin"})).Post("/", h.Create)
 	r.With(h.AuthMiddleware.Authenticate([]string{"admin"})).Get("/", h.List)
 	r.With(h.AuthMiddleware.Authenticate([]string{"admin"})).Delete("/{system_name}", h.Delete)
+	r.With(h.AuthMiddleware.Authenticate([]string{"admin"})).Put("/{system_name}", h.Update)
 
 	r.Route("/auth", func(r chi.Router) {
 		r.Post("/authenticate", h.Auth)

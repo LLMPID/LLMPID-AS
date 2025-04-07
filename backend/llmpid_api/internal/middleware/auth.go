@@ -19,7 +19,7 @@ func NewAuthMiddleware(tokenService *service.TokenService, authService *service.
 	return &AuthMiddleware{tokenService: tokenService, authService: authService}
 }
 
-func (m *AuthMiddleware) Authenticate(requiredRole []string) func(http.Handler) http.Handler {
+func (m *AuthMiddleware) Authorize(requiredRole []string) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			authHeader := r.Header.Get("Authorization")

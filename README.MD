@@ -223,7 +223,7 @@ POST /api/system/external/auth/authenticate
 ### Description
 Essentially, this logs in an external system, creates a session, and issues an access token valid for 500 days (as to not be permanent). A system can have multiple active sessions, each of which can be revoked individually or all at once. The token grants access to routes that require the `ext_sys` role.
 ### Example Request (Current Session):
-```http
+```http 
 POST /api/system/external/auth/authenticate
 
 {
