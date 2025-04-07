@@ -28,15 +28,15 @@ func NewExternalSystemHandler(externalSysService *service.ExternalSystemService,
 func (h *ExternalSystemHandler) Routes() chi.Router {
 	r := chi.NewRouter()
 
-	r.With(h.AuthMiddleware.Authenticate([]string{"admin"})).Post("/", h.Create)
-	r.With(h.AuthMiddleware.Authenticate([]string{"admin"})).Get("/", h.List)
-	r.With(h.AuthMiddleware.Authenticate([]string{"admin"})).Delete("/{system_name}", h.Delete)
-	r.With(h.AuthMiddleware.Authenticate([]string{"admin"})).Put("/{system_name}", h.Update)
+	r.With(h.AuthMiddleware.Authorize([]string{"admin"})).Post("/", h.Create)
+	r.With(h.AuthMiddleware.Authorize([]string{"admin"})).Get("/", h.List)
+	r.With(h.AuthMiddleware.Authorize([]string{"admin"})).Delete("/{system_name}", h.Delete)
+	r.With(h.AuthMiddleware.Authorize([]string{"admin"})).Put("/{system_name}", h.Update)
 
 	r.Route("/auth", func(r chi.Router) {
 		r.Post("/authenticate", h.Auth)
-		r.With(h.AuthMiddleware.Authenticate([]string{"admin"})).Put("/deauthenticate/{system_name}", h.DeauthByName)
-		r.With(h.AuthMiddleware.Authenticate([]string{"ext_sys"})).Put("/deauthenticate", h.Deauth)
+		r.With(h.AuthMiddleware.Authorize([]string{"admin"})).Put("/deauthenticate/{system_name}", h.DeauthByName)
+		r.With(h.AuthMiddleware.Authorize([]string{"ext_sys"})).Put("/deauthenticate", h.Deauth)
 	})
 	return r
 }
@@ -139,17 +139,8 @@ func (h *ExternalSystemHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.AuthService.RevokeAllSessionsByUsername(updateExternalSystemRequest.OldSystemName)
-	if err != nil {
-		resp := dto.GenericResponse{Status: "Fail", Message: "failed to revoke sessions"}
-
-		render.Status(r, http.StatusInternalServerError)
-		render.JSON(w, r, resp)
-		return
-	}
-
 	render.Status(r, http.StatusOK)
-	render.JSON(w, r, map[string]string{"status": "Success", "data": ""})
+	render.JSON(w, r, map[string]string{"status": "Success", "message": "Access token access is now limited. The external system will be able to gain full access upon reauthentication."})
 }
 
 func (h *ExternalSystemHandler) Delete(w http.ResponseWriter, r *http.Request) {
