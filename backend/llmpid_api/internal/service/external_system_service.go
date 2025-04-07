@@ -38,6 +38,15 @@ func (s *ExternalSystemService) Register(systemName string) (string, error) {
 	return systemAccessKey, nil
 }
 
+func (s *ExternalSystemService) Update(oldServiceName string, newServiceName string) error {
+	_, err := s.UserRepo.UpdateUsername(oldServiceName, newServiceName)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (s *ExternalSystemService) List() ([]string, error) {
 	var services []string
 
@@ -54,5 +63,6 @@ func (s *ExternalSystemService) List() ([]string, error) {
 }
 
 func (s *ExternalSystemService) DeleteBySysName(username string) error {
+
 	return s.UserRepo.DeleteByUsername(username)
 }

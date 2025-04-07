@@ -39,6 +39,18 @@ func (r *UserRepository) UpdatePasswordHashByUserID(id uint, passwordHash string
 	return nil
 }
 
+func (r *UserRepository) UpdateUsername(oldUsername string, newUsername string) (models.User, error) {
+	var updatedUser models.User
+	updateEvent := r.DB.Model(&models.User{}).Where("username = ?", oldUsername).Update("username", newUsername)
+
+	if updateEvent.Error != nil {
+		r.logger.Error("Unable to update user's username. ERR: ", updateEvent.Error.Error())
+		return models.User{}, errors.New("unalbe to update name")
+	}
+
+	updateEvent.Scan(updatedUser)
+	return updatedUser, nil
+}
 func (r *UserRepository) SelectUserByUsername(username string) (models.User, error) {
 	var foundUser models.User
 	if err := r.DB.Where("username = ?", username).First(&foundUser).Error; err != nil {

@@ -121,7 +121,7 @@ func (h *ExternalSystemHandler) List(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *ExternalSystemHandler) Update(w http.ResponseWriter, r *http.Request) {
-	var updateExternalSystemRequest dto.RegisterExtSystemRequest // The update request is the same as the register one. We use the same DTO.
+	var updateExternalSystemRequest dto.UpdateExtSystemRequest // The update request is the same as the register one. We use the same DTO.
 
 	if err := render.DecodeJSON(r.Body, &updateExternalSystemRequest); err != nil {
 		render.Status(r, http.StatusBadRequest)
@@ -129,13 +129,26 @@ func (h *ExternalSystemHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Check if old system exists
+	err := h.ExternalSysService.Update(updateExternalSystemRequest.OldSystemName, updateExternalSystemRequest.NewSystemName)
+	if err != nil {
+		resp := dto.GenericResponse{Status: "Fail", Message: err.Error()}
 
-	// Update the name
-	//updatedKey, err := h.ExternalSysService.Update(updateExternalSystemRequest.SystemName)
+		render.Status(r, http.StatusInternalServerError)
+		render.JSON(w, r, resp)
+		return
+	}
+
+	err = h.AuthService.RevokeAllSessionsByUsername(updateExternalSystemRequest.OldSystemName)
+	if err != nil {
+		resp := dto.GenericResponse{Status: "Fail", Message: "failed to revoke sessions"}
+
+		render.Status(r, http.StatusInternalServerError)
+		render.JSON(w, r, resp)
+		return
+	}
 
 	render.Status(r, http.StatusOK)
-	render.JSON(w, r, map[string]string{"status": "Success", "access_key": "accessKey"})
+	render.JSON(w, r, map[string]string{"status": "Success", "data": ""})
 }
 
 func (h *ExternalSystemHandler) Delete(w http.ResponseWriter, r *http.Request) {
