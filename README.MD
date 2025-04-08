@@ -100,7 +100,7 @@ POST /api/user/auth/login
 Performs user authentication for the administrator user. Default credentials are `admin`:`changemeasap`, where password must be changed on first login in order to prevent unauthorized usage. Returns JWT Bearer token.
 ### Example Request:
 ```http
-POST /api/user/auth
+POST /api/user/auth/login
 
 {
   "username": "admin",
