@@ -27,5 +27,5 @@ CREATE TABLE IF NOT EXISTS sessions (
 INSERT INTO users (username, password_hash, role) VALUES (
     'admin',
     '$argon2id$v=19$m=65536,t=1,p=10$ff+Is1j1GoKrkiiYvLLyGQ$xKmunDT6s3/xoa2+ajvex9tFDNdDLN5aSOFgVzqNMWo',
-    'user'
+    'admin'
 );
