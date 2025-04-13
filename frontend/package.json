@@ -14,9 +14,11 @@
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@tanstack/react-query": "^5.66.0",
+    "axios": "^1.8.4",
     "framer-motion": "^12.4.1",
     "gsap": "^3.12.7",
-    "next-themes": "^0.4.4",
+    "jotai": "^2.12.2",
+    "next-themes": "^0.4.6",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-icons": "^5.5.0"
