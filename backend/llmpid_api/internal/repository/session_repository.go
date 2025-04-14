@@ -44,8 +44,8 @@ func (r *SessionRepository) IsValidSession(sessionID string, sub string) bool {
 	return true
 }
 
-func (r *SessionRepository) DeleteSessionBySID(slug string) {
-	r.DB.Where("session_id = ?", slug).Delete(&models.Session{})
+func (r *SessionRepository) DeleteSessionBySID(sid string) {
+	r.DB.Where("session_id = ?", sid).Delete(&models.Session{})
 }
 
 func (r *SessionRepository) DeleteSessionBySub(sub string) {
@@ -63,10 +63,10 @@ func (r *SessionRepository) SelectSessionBySub(sub string) (models.Session, erro
 	return session, nil
 }
 
-func (r *SessionRepository) SelectSessionBySIDAndSub(slug string, sub string) (models.Session, error) {
+func (r *SessionRepository) SelectSessionBySIDAndSub(sid string, sub string) (models.Session, error) {
 	var session models.Session
 
-	err := r.DB.Where("session_id = ?", slug).Where("sub = ?", sub).First(&session).Error
+	err := r.DB.Where("session_id = ?", sid).Where("sub = ?", sub).First(&session).Error
 	if err != nil {
 		r.logger.Error("Unable to find session by session_id and sub. ERR: ", err)
 		return session, err
