@@ -17,7 +17,7 @@ func NewClassificationLogsRepository(db *gorm.DB, logger *logrus.Logger) *Classi
 
 // InsertClassificationRequest inserts a classification  log (ClassificationLog) into the database.
 func (r *ClassificationLogsRepository) InsertClassificationLog(classificationLog models.ClassificationLog) error {
-	return r.DB.Create(classificationLog).Error
+	return r.DB.Create(&classificationLog).Error
 }
 
 // SelectClassificationLogByID returns a single database entry for a classification log based on ID.

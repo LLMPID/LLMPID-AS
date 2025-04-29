@@ -13,12 +13,14 @@ import {
   Text,
   Image,
 } from "@chakra-ui/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FiEye, FiEyeOff } from "react-icons/fi";
-import { login } from "@/auth/auth"; // path to your login function
+import { login } from "@/auth";
 import { useSetAtom } from "jotai";
 import { authTokenAtom } from "@/atoms/authAtom";
-import { toaster, Toaster } from "@/components/ui/toaster"
+import { useAtomValue } from "jotai";
+import { toaster, Toaster } from "@/components/ui/toaster";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
@@ -26,8 +28,15 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
-
   const setToken = useSetAtom(authTokenAtom);
+  const navigate = useNavigate();
+  const token = useAtomValue(authTokenAtom);
+
+  useEffect(() => {
+    if (token) {
+      navigate("/dashboard");
+    }
+  }, [token, navigate]);
 
   const handleLogin = async () => {
     setLoading(true);
@@ -85,66 +94,63 @@ export default function Login() {
         <Text fontSize="sm" color="gray.500" mb={6}>
           Please enter your details to sign in
         </Text>
-
-        <Fieldset.Root size="md" mb={4} invalid = {hasError}>
-          <Stack gap={4}>
-            <Fieldset.Legend srOnly>Sign In</Fieldset.Legend>
-
-            <Fieldset.Content>
-              <Field.Root invalid = {hasError}>
-                <Field.Label>Username</Field.Label>
-                <Input
-                  name="username"
-                  placeholder="Enter your username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                />
-              </Field.Root>
-
-              <Field.Root invalid = {hasError}>
-                <Field.Label>Password</Field.Label>
-                <Group attached w="full">
-                  <Input
-                    name="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Enter your password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    flex="1"
-                  />
-                  <IconButton
-                    zIndex={-1}
-                    aria-label={
-                      showPassword ? "Hide password" : "Show password"
-                    }
-                    variant="outline"
-                    onClick={() => setShowPassword(!showPassword)}
-                    
-                  >
-                    {showPassword ? <FiEyeOff /> : <FiEye />}
-                  </IconButton>
-                </Group>
-              </Field.Root>
-            </Fieldset.Content>
-          </Stack>
-        </Fieldset.Root>
-
-        <Flex justify="flex-end" mb={4}>
-          <Link fontSize="sm" color="blue.500" href="#">
-            Change Password
-          </Link>
-        </Flex>
-
-        <Button
-          colorScheme="purple"
-          w="full"
-          mb={4}
-          onClick={handleLogin}
-          loading={loading}
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleLogin();
+          }}
         >
-          Sign in
-        </Button>
+          <Fieldset.Root size="md" mb={4} invalid={hasError}>
+            <Stack gap={4}>
+              <Fieldset.Legend srOnly>Sign In</Fieldset.Legend>
 
+              <Fieldset.Content>
+                <Field.Root invalid={hasError}>
+                  <Field.Label>Username</Field.Label>
+                  <Input
+                    name="username"
+                    placeholder="Enter your username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                  />
+                </Field.Root>
+
+                <Field.Root invalid={hasError}>
+                  <Field.Label>Password</Field.Label>
+                  <Group attached w="full">
+                    <Input
+                      name="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Enter your password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      flex="1"
+                    />
+                    <IconButton
+                      zIndex={-1}
+                      aria-label={
+                        showPassword ? "Hide password" : "Show password"
+                      }
+                      variant="outline"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? <FiEyeOff /> : <FiEye />}
+                    </IconButton>
+                  </Group>
+                </Field.Root>
+              </Fieldset.Content>
+              <Button
+                colorScheme="purple"
+                w="full"
+                mb={4}
+                type="submit"
+                loading={loading}
+              >
+                Sign in
+              </Button>
+            </Stack>
+          </Fieldset.Root>
+        </form>
         <Flex justify="center">
           <Link
             href="https://github.com/LLMPID/LLMPID-AS"
@@ -157,9 +163,7 @@ export default function Login() {
           </Link>
         </Flex>
       </Box>
-      <Toaster/>
+      <Toaster />
     </Flex>
-    
-    
   );
 }

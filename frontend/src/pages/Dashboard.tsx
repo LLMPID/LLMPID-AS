@@ -4,7 +4,6 @@ import {
   Button,
   VStack,
   Text,
-  Heading,
   Flex,
   Collapsible,
   Textarea,
@@ -24,10 +23,10 @@ import {
   useQuery,
 } from "@tanstack/react-query";
 import { fetchClassification, classifyText } from "@/api/classification";
-
+import Header from "@/components/ui/Header";
 const queryClient = new QueryClient();
 
-function App() {
+function Dashboard() {
   const [text, setText] = useState("");
   const [classification, setClassification] = useState<string | null>(null);
   const [activeTicket, setActiveTicket] = useState<number | null>(null);
@@ -41,7 +40,7 @@ function App() {
     queryFn: fetchClassification,
   });
 
-  const mutation = useMutation({
+  const addClassification = useMutation({
     mutationFn: classifyText,
     onSuccess: (newClassification) => {
       setClassification(newClassification.result);
@@ -66,15 +65,15 @@ function App() {
   }, [limit, sort, page]);
 
   return (
-    <Box bg="white" py={8} minH="100vh">
-      <Box bg="white" p={8} maxW="1100px" mx="auto" alignItems="center">
-        <Heading mb={6} textAlign="center" color="gray.700">
-          Prompt Injection Classification
-        </Heading>
+    
+    <Box bg="white" minH="100vh">
+        
+      <Box bg="white" maxW="1100px" mx="auto" alignItems="center">
+      <Header/>
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            mutation.mutate(text);
+            addClassification.mutate(text);
           }}
         >
           <VStack spaceY={4} alignItems="center">
@@ -108,7 +107,7 @@ function App() {
                 bgGradient: "linear(to-r, blue.600, blue.700)",
                 boxShadow: "inner",
               }}
-              loading={mutation.isPending}
+              loading={addClassification.isPending}
             >
               Classify
             </Button>
@@ -129,9 +128,9 @@ function App() {
                 Classification: {classification}
               </Text>
             )}
-            {mutation.isError && (
+            {addClassification.isError && (
               <Text color="red.500" fontSize="sm">
-                {mutation.error.message}
+                {addClassification.error.message}
               </Text>
             )}
           </VStack>
@@ -281,7 +280,7 @@ function App() {
 export default function RootApp() {
   return (
     <QueryClientProvider client={queryClient}>
-      <App />
+      <Dashboard />
     </QueryClientProvider>
   );
 }
