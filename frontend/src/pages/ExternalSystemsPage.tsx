@@ -12,7 +12,7 @@ import {
   Heading,
   Flex,
 } from "@chakra-ui/react";
-import { FiPlusSquare } from "react-icons/fi";
+import { FiPlusSquare, FiInfo } from "react-icons/fi";
 import { FaArrowLeft } from "react-icons/fa6";
 import {
   fetchExternalSystems,
@@ -21,6 +21,7 @@ import {
 } from "@/api/externalsystems";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { toaster, Toaster } from "@/components/ui/toaster";
+import { Tooltip } from "@/components/ui/tooltip";
 import { Link } from "react-router-dom";
 
 export default function ExternalSystemsPage() {
@@ -143,9 +144,32 @@ export default function ExternalSystemsPage() {
             </HStack>
 
             {addMutation.data?.access_key && (
-              <Box mt={4} p={4} borderWidth="1px" borderRadius="md">
+              <Box
+                mt={4}
+                p={4}
+                borderWidth="1px"
+                borderRadius="md"
+                textAlign="center"
+              >
                 <Text fontWeight="bold">New Access Token:</Text>
-                <Text color="green.600">{addMutation.data.access_key}</Text>
+                <HStack
+                  w="100%"
+                  justify="center"
+                  align="center"
+                  mt={2}
+                >
+                  <Text color="green.600">{addMutation.data.access_key}</Text>
+                  <Tooltip
+                    content="This is your API key. Make sure to copy it now — you won’t be able to view it again!"
+                    aria-label="Copy your API key reminder"
+                    positioning={{ placement: "right-end" }}
+                    showArrow
+                    openDelay={0}
+                    closeDelay={0}
+                  >
+                    <Icon as={FiInfo}></Icon>
+                  </Tooltip>
+                </HStack>
               </Box>
             )}
           </Box>
