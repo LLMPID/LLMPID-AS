@@ -65,18 +65,16 @@ function Dashboard() {
   }, [limit, sort, page]);
 
   return (
-    
     <Box bg="white" minH="100vh">
-        
       <Box bg="white" maxW="1100px" mx="auto" alignItems="center">
-      <Header/>
+        <Header />
         <form
           onSubmit={(e) => {
             e.preventDefault();
             addClassification.mutate(text);
           }}
         >
-          <VStack spaceY={4} alignItems="center">
+          <VStack spaceY={4} alignItems="center" my={50}>
             <Textarea
               placeholder="Enter text"
               value={text}
@@ -255,7 +253,7 @@ function Dashboard() {
             </Collapsible.Root>
           ))}
         </Flex>
-        <Flex mt={5} justify="center" gap={4}>
+        <Flex my={5} justify="center" gap={4}>
           <Button
             onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
             disabled={page === 1}

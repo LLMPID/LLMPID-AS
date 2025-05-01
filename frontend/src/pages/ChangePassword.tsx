@@ -23,53 +23,56 @@ import { useSetAtom } from "jotai";
 import { useNavigate } from "react-router-dom";
 
 export default function ChangePassword() {
-
   const token = useAtomValue(authTokenAtom);
   const username = getUsernameFromToken(token);
   const [old_password, setOldPassword] = useState("");
   const [new_password, setNewPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
-	const setToken = useSetAtom(authTokenAtom);
-	const navigate = useNavigate();
+  const setToken = useSetAtom(authTokenAtom);
+  const navigate = useNavigate();
 
   const handleChange = async () => {
-      setLoading(true);
-      setHasError(false);
-      try {
-        const response = await changePassword({ username, old_password, new_password });
-        if (response?.access_token) {
-          setToken(response.access_token);
-					setTimeout(() => {
-						navigate("/dashboard");
-					}, 2000);
-					toaster.create({
-						title: "Updated Credentials!",
-						description: "You have changed your password",
-						type: "success",
-						duration: 2000,
-					});
-        } else {
-          setHasError(true);
-          toaster.create({
-            title: "Login failed",
-            description: "Invalid credentials or no token returned.",
-            type: "error",
-            duration: 4000,
-          });
-        }
-      } catch (error) {
+    setLoading(true);
+    setHasError(false);
+    try {
+      const response = await changePassword({
+        username,
+        old_password,
+        new_password,
+      });
+      if (response?.access_token) {
+        setToken(response.access_token);
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 2000);
+        toaster.create({
+          title: "Updated Credentials!",
+          description: "You have changed your password",
+          type: "success",
+          duration: 2000,
+        });
+      } else {
         setHasError(true);
         toaster.create({
-          title: "Login error",
-          description: "Wrong credentials!",
+          title: "Login failed",
+          description: "Invalid credentials or no token returned.",
           type: "error",
           duration: 4000,
         });
-      } finally {
-        setLoading(false);
       }
-    };
+    } catch (error) {
+      setHasError(true);
+      toaster.create({
+        title: "Login error",
+        description: "Wrong credentials!",
+        type: "error",
+        duration: 4000,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <Flex minH="100vh" align="center" justify="center" bg="gray.50" px={4}>
       <Box
@@ -110,7 +113,7 @@ export default function ChangePassword() {
                   type="password"
                   name="password"
                   placeholder="Enter your password"
-									onChange={(e) => setOldPassword(e.target.value)}
+                  onChange={(e) => setOldPassword(e.target.value)}
                 />
               </Field.Root>
 
@@ -120,19 +123,19 @@ export default function ChangePassword() {
                   type="password"
                   name="confirmPassword"
                   placeholder="********"
-									onChange={(e) => setNewPassword(e.target.value)}
+                  onChange={(e) => setNewPassword(e.target.value)}
                 />
               </Field.Root>
             </Fieldset.Content>
           </Stack>
         </Fieldset.Root>
 
-        <Button 
-				w="full" 
-				fontWeight="medium"
-				onClick={handleChange}
-				loading={loading}
-				>
+        <Button
+          w="full"
+          fontWeight="medium"
+          onClick={handleChange}
+          loading={loading}
+        >
           Reset Password
         </Button>
         <Box mt={4} textAlign="center">
@@ -149,7 +152,7 @@ export default function ChangePassword() {
           </Link>
         </Box>
       </Box>
-      <Toaster/>
+      <Toaster />
     </Flex>
   );
 }

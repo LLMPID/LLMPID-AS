@@ -9,4 +9,9 @@ export const changePassword = async (passwordData: { username: string; old_passw
   const response = await api.post('/user/auth/credentials/change', passwordData);
   return response.data;
 };
+ 
+export const logout = async () => {
+  const response = await api.put('/user/auth/logout');
+  return response.data
+}
 

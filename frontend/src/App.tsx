@@ -3,7 +3,7 @@ import ChangePassword from "@/pages/ChangePassword";
 import Dashboard from "@/pages/Dashboard";
 import Login from "@/pages/Login";
 import ProtectedRoutes from "@/utils/ProtectedRoutes";
-// import Header from "@/components/ui/Header";
+import ExternalSystemsPage from "@/pages/ExternalSystemsPage";
 export default function App() {
   return (
     <Router>
@@ -12,6 +12,7 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route element={<ProtectedRoutes />}>
           <Route path="/change" element={<ChangePassword />} />
+          <Route path="/external-systems" element={<ExternalSystemsPage />} />
           <Route path="/dashboard" element={<Dashboard />} />
         </Route>
       </Routes>
