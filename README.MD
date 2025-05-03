@@ -33,7 +33,7 @@ An example usage of LLMPID-AS:
 
 
 # Quick Look
-[![Quick demo video](thumbnail.png)](https://drive.google.com/file/d/1P0fm3jR95rMjau5_tkkIDqcQvDF7wWWd/view?usp=sharing)
+[![Quick demo video](thumbnail.png)](https://drive.google.com/file/d/15qSiy83Foh3qHdS8J4L55zCLDssmvWDq/view?usp=sharing)`
 
 
 # Why we made it?
