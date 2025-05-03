@@ -473,7 +473,9 @@ The project branching uses the following structure:
   * Branches with prefix `hotfix` (eg. `hotfix/textbox-spelling`) - quick or emergency fixes that don't have to go to development and be tested.
 * `dev` - the development branch of the code.
   * Branches with prefix `feature` (eg. `feature/authentication`) - feature branches of the `dev` branch.
+  * Branches with prefix `fix` (eg. `fix/auth-bypass`) - a branch for fixing any issues that require more time.
   * Branches with prefix `hotfix` (eg. `hotfix/textbox-spelling`) - quick or emergency fixes.
+
 
 
 
