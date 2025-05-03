@@ -158,7 +158,7 @@ Revokes the current user session or all live user sessions. This is determined b
 PUT /api/user/auth/logout
 ```
 ### Example Response:
-```HTTP
+```http
 Status 200
 ```
 ### Example Request (All Active Sessions):
@@ -166,7 +166,7 @@ Status 200
 PUT /api/user/auth/logout?all=true
 ```
 ### Example Response:
-```HTTP
+```http
 Status 200
 ```
 
