@@ -146,18 +146,18 @@ func (h *ExternalSystemHandler) Update(w http.ResponseWriter, r *http.Request) {
 func (h *ExternalSystemHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	systemName := chi.URLParam(r, "system_name")
 
-	err := h.ExternalSysService.DeleteBySysName(systemName)
+	err := h.AuthService.RevokeAllSessionsByUsername(systemName)
 	if err != nil {
-		resp := dto.GenericResponse{Status: "Fail", Message: err.Error()}
+		resp := dto.GenericResponse{Status: "Fail", Message: "failed to revoke sessions"}
 
 		render.Status(r, http.StatusInternalServerError)
 		render.JSON(w, r, resp)
 		return
 	}
 
-	err = h.AuthService.RevokeAllSessionsByUsername(systemName)
+	err = h.ExternalSysService.DeleteBySysName(systemName)
 	if err != nil {
-		resp := dto.GenericResponse{Status: "Fail", Message: "failed to revoke sessions"}
+		resp := dto.GenericResponse{Status: "Fail", Message: err.Error()}
 
 		render.Status(r, http.StatusInternalServerError)
 		render.JSON(w, r, resp)
