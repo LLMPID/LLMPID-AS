@@ -166,6 +166,7 @@ export default function ExternalSystemsPage() {
                     showArrow
                     openDelay={0}
                     closeDelay={0}
+                    open={true}
                   >
                     <Icon as={FiInfo}></Icon>
                   </Tooltip>
