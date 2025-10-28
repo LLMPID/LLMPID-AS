@@ -22,15 +22,19 @@ func NewClassificationService(logsRepo *repository.ClassificationLogsRepository,
 
 // ClassifyText performs prompt injection classification for a privded string.
 // First, it sends the string for classification to an internal API, retrieves and logs the result into a database, and then returns it to the client service.
-func (s *ClassificationService) ClassifyText(ClassificationLog dto.ClassificationRequest) (models.ClassificationLog, error) {
+func (s *ClassificationService) ClassifyText(ClassificationLog dto.ClassificationRequest, sourceName string) (models.ClassificationLog, error) {
 	// Send data for classification.
 	clssResult, err := s.ClassificationRepo.SendClassificationRequest(ClassificationLog)
 	if err != nil {
 		return models.ClassificationLog{}, err
 	}
 
+	if len(sourceName) <= 0 {
+		sourceName = "undefined"
+	}
+
 	// Create a classification log with the request and result and make a DB entry.
-	clssRequest := models.ClassificationLog{RequestText: ClassificationLog.Text, Result: clssResult}
+	clssRequest := models.ClassificationLog{SourceName: sourceName, RequestText: ClassificationLog.Text, Result: clssResult}
 	err = s.ClassificationLogsRepo.InsertClassificationLog(clssRequest)
 	if err != nil {
 		return models.ClassificationLog{}, err

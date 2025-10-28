@@ -8,6 +8,7 @@ import (
 	"github.com/go-chi/render"
 	"llm-promp-inj.api/internal/dto"
 	"llm-promp-inj.api/internal/middleware"
+	"llm-promp-inj.api/internal/models"
 	"llm-promp-inj.api/internal/service"
 )
 
@@ -40,7 +41,12 @@ func (h *ClassificationHandler) CreateClassificationRequest(w http.ResponseWrite
 		return
 	}
 
-	classificationRequestResult, err := h.ClssService.ClassifyText(classificationRequest)
+	usernameClaim, ok := r.Context().Value("userClaims").(models.AccessTokenClaims).Data["username"]
+	if !ok {
+		usernameClaim = ""
+	}
+
+	classificationRequestResult, err := h.ClssService.ClassifyText(classificationRequest, usernameClaim)
 	if err != nil {
 
 		response := dto.GenericResponse{
