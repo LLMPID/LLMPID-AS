@@ -34,7 +34,7 @@ function Dashboard() {
   const [sort, setSort] = useState("desc");
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
-
+  
   const { data, error, isLoading } = useQuery({
     queryKey: ["classification", page, limit, sort],
     queryFn: fetchClassification,
@@ -210,7 +210,7 @@ function Dashboard() {
                     : "black"
                 }
               >
-                <Flex justify="space-between" align="center">
+                <Flex align="center" position="relative" width="100%">
                   <Text fontSize="md" color="blue.700" fontWeight="bold">
                     Id: {c.id}
                   </Text>
@@ -226,20 +226,26 @@ function Dashboard() {
                         ? "red.600"
                         : "black"
                     }
-                    marginLeft="75px"
+                    position="absolute"
+                    left="50%"
+                    transform="translateX(-50%)"
                   >
                     Result: {c.result}
                   </Text>
-
-                  <Text fontSize="sm" color="gray.500">
-                    Date:{" "}
-                    {new Date(c.created_at).toLocaleTimeString("en-US", {
-                      hour: "numeric",
-                      minute: "numeric",
-                      second: "numeric",
-                      hour12: true,
-                    })}
-                  </Text>
+                  <Box ml="auto" textAlign="right">
+                    <Text fontSize="sm" color="gray.500">
+                      Source: {c.source_name}
+                    </Text>
+                    <Text fontSize="sm" color="gray.500">
+                      Date:{" "}
+                      {new Date(c.created_at).toLocaleTimeString("en-US", {
+                        hour: "numeric",
+                        minute: "numeric",
+                        second: "numeric",
+                        hour12: true,
+                      })}
+                    </Text>
+                  </Box>
                 </Flex>
               </Collapsible.Trigger>
               <Collapsible.Content>
