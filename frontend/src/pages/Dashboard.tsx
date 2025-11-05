@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import {
   Box,
   Button,
@@ -15,7 +15,12 @@ import {
   MenuRoot,
   MenuTrigger,
 } from "@/components/ui/menu";
-import { FaSortAmountDown, FaSortAmountUp } from "react-icons/fa";
+import {
+  FaSortAmountDown,
+  FaSortAmountUp,
+  FaSortAlphaDown,
+  FaSortAlphaUp,
+} from "react-icons/fa";
 import {
   QueryClient,
   QueryClientProvider,
@@ -32,6 +37,9 @@ function Dashboard() {
   const [activeTicket, setActiveTicket] = useState<number | null>(null);
 
   const [sort, setSort] = useState("desc");
+  const [sourceSortDirection, setSourceSortDirection] = useState<
+    "asc" | "desc" | null
+  >(null);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
 
@@ -63,6 +71,27 @@ function Dashboard() {
 
     prevValues.current = { limit, sort };
   }, [limit, sort, page]);
+
+  useEffect(() => {
+    setActiveTicket(null);
+  }, [sourceSortDirection]);
+
+  const sortedData = useMemo(() => {
+    if (!data) {
+      return [];
+    }
+    const items = data.slice();
+    if (sourceSortDirection) {
+      items.sort((a: any, b: any) => {
+        const aName = a.source_name ?? "";
+        const bName = b.source_name ?? "";
+        return sourceSortDirection === "asc"
+          ? aName.localeCompare(bName)
+          : bName.localeCompare(aName);
+      });
+    }
+    return items;
+  }, [data, sourceSortDirection]);
 
   return (
     <Box bg="white" minH="100vh">
@@ -139,8 +168,10 @@ function Dashboard() {
           mb={4}
           fontWeight="medium"
           justify="space-between"
+          align="center"
+          gap={4}
         >
-          <Flex gap="3">
+          <Flex gap="3" align="center">
             <Text pt="1">Number of entries:</Text>
             <MenuRoot>
               <MenuTrigger asChild>
@@ -161,9 +192,34 @@ function Dashboard() {
               </MenuContent>
             </MenuRoot>
           </Flex>
-          <Button onClick={() => setSort(sort === "desc" ? "asc" : "desc")}>
-            {sort === "desc" ? <FaSortAmountDown /> : <FaSortAmountUp />}
-          </Button>
+          <Flex gap="3">
+            <Button
+              size="sm"
+              onClick={() => {
+                setSourceSortDirection(null);
+                setSort(sort === "desc" ? "asc" : "desc");
+              }}
+            >
+              {sort === "desc" ? <FaSortAmountDown /> : <FaSortAmountUp />}
+              Sort by Date
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => {
+                setSort("desc");
+                setSourceSortDirection((prev) =>
+                  prev === "asc" ? "desc" : "asc"
+                );
+              }}
+            >
+              {sourceSortDirection === "desc" ? (
+                <FaSortAlphaUp />
+              ) : (
+                <FaSortAlphaDown />
+              )}
+              Sort by Source
+            </Button>
+          </Flex>
         </Flex>
 
         <Flex direction="column" gap={3}>
@@ -173,7 +229,7 @@ function Dashboard() {
               {error.message}
             </Text>
           )}
-          {data?.slice().map((c: any, index: number) => (
+          {sortedData.map((c: any, index: number) => (
             <Collapsible.Root
               key={c.id}
               open={activeTicket === index}
@@ -210,7 +266,7 @@ function Dashboard() {
                     : "black"
                 }
               >
-                <Flex justify="space-between" align="center">
+                <Flex align="center" position="relative" width="100%">
                   <Text fontSize="md" color="blue.700" fontWeight="bold">
                     Id: {c.id}
                   </Text>
@@ -226,20 +282,26 @@ function Dashboard() {
                         ? "red.600"
                         : "black"
                     }
-                    marginLeft="75px"
+                    position="absolute"
+                    left="50%"
+                    transform="translateX(-50%)"
                   >
                     Result: {c.result}
                   </Text>
-
-                  <Text fontSize="sm" color="gray.500">
-                    Date:{" "}
-                    {new Date(c.created_at).toLocaleTimeString("en-US", {
-                      hour: "numeric",
-                      minute: "numeric",
-                      second: "numeric",
-                      hour12: true,
-                    })}
-                  </Text>
+                  <Box ml="auto" textAlign="right">
+                    <Text fontSize="sm" color="gray.500">
+                      Source: {c.source_name}
+                    </Text>
+                    <Text fontSize="sm" color="gray.500">
+                      Date:{" "}
+                      {new Date(c.created_at).toLocaleTimeString("en-US", {
+                        hour: "numeric",
+                        minute: "numeric",
+                        second: "numeric",
+                        hour12: true,
+                      })}
+                    </Text>
+                  </Box>
                 </Flex>
               </Collapsible.Trigger>
               <Collapsible.Content>
