@@ -1,5 +1,6 @@
 CREATE TABLE IF NOT EXISTS classification_logs (
     id BIGSERIAL PRIMARY KEY,
+    source_name VARCHAR(64),
     request_text TEXT NOT NULL,
     result VARCHAR(32),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

@@ -8,6 +8,7 @@ import (
 	"github.com/go-chi/render"
 	"llm-promp-inj.api/internal/dto"
 	"llm-promp-inj.api/internal/middleware"
+	"llm-promp-inj.api/internal/models"
 	"llm-promp-inj.api/internal/service"
 )
 
@@ -33,6 +34,7 @@ func (h *ClassificationHandler) Routes() chi.Router {
 
 func (h *ClassificationHandler) CreateClassificationRequest(w http.ResponseWriter, r *http.Request) {
 	var classificationRequest dto.ClassificationRequest
+	var usernameClaim string
 
 	if err := render.DecodeJSON(r.Body, &classificationRequest); err != nil {
 		render.Status(r, http.StatusBadRequest)
@@ -40,7 +42,14 @@ func (h *ClassificationHandler) CreateClassificationRequest(w http.ResponseWrite
 		return
 	}
 
-	classificationRequestResult, err := h.ClssService.ClassifyText(classificationRequest)
+	userClaimsCtx, ok := r.Context().Value("userClaims").(*models.AccessTokenClaims)
+	if !ok {
+		usernameClaim = ""
+	} else {
+		usernameClaim = userClaimsCtx.Data["username"]
+	}
+
+	classificationRequestResult, err := h.ClssService.ClassifyText(classificationRequest, usernameClaim)
 	if err != nil {
 
 		response := dto.GenericResponse{

@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   HStack,
   VStack,
@@ -22,9 +22,10 @@ import {
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { toaster, Toaster } from "@/components/ui/toaster";
 import { Tooltip } from "@/components/ui/tooltip";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function ExternalSystemsPage() {
+  const navigate = useNavigate();
   const [loadingIndex, setLoadingIndex] = useState<number | null>(null);
   const [externalName, setExternalName] = useState("");
   const { data, error, isLoading } = useQuery({
@@ -85,6 +86,18 @@ export default function ExternalSystemsPage() {
     setLoadingIndex(index);
     deleteMutation.mutate(name);
   };
+
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        navigate("/dashboard");
+      }
+    };
+
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
+  }, [navigate]);
+
   return (
     <Flex
       minH="100vh"
@@ -93,6 +106,11 @@ export default function ExternalSystemsPage() {
       bg="gray.50"
       px={4}
       py={10}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          navigate("/dashboard");
+        }
+      }}
     >
       <Box
         bgGradient="linear(to-b, white, gray.50)"
@@ -157,8 +175,20 @@ export default function ExternalSystemsPage() {
                   justify="center"
                   align="center"
                   mt={2}
+                  onClick={() => {
+                    navigator.clipboard.writeText(addMutation.data.access_key);
+                    toaster.create({
+                      title: "Succesfully copied the token to clipboard!",
+                      description:
+                        "You should keep this token somewhere safe, because you cannot view it again.",
+                      type: "success",
+                      duration: 2000,
+                    });
+                  }}
                 >
-                  <Text color="green.600">{addMutation.data.access_key}</Text>
+                  <Text color="green.600" cursor={"pointer"}>
+                    {addMutation.data.access_key}
+                  </Text>
                   <Tooltip
                     content="This is your API key. Make sure to copy it now — you won’t be able to view it again!"
                     aria-label="Copy your API key reminder"
