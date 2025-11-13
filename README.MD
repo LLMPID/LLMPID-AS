@@ -3,7 +3,7 @@ The LLM Prompt Injection Detection API Service is a PoC that aims to provide an 
 
 The project provides an HTTP API that allows other systems (or users) to detect prompt injections by sending a request with the prompt provided to their LLM service. The prompt is then classified based on a fine-tuned BERT model.
 
-Important: The current version is a PoC and lacks authentication and authorization functionalities. It can still be implemented as an internal service.
+Important: The current version is a PoC and lacks authentication and authorization functionalities. It can still be implemented as an internal service. The full, production ready version can be found on [warper.io](https://warper.io)
 
 ```ascii
 An example usage of LLMPID-AS:
